@@ -1,0 +1,129 @@
+﻿@use '../../styles/vars' as vars;
+
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  padding: 20px 0;
+  box-sizing: border-box;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    .product-card__title {
+      color: vars.$siteSelectorColorHover;
+    }
+  }
+
+  &__image-container {
+    width: 100%;
+    height: 210px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  &__image {
+    object-fit: contain;
+    height: 100%;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  &__discount {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: #ff5252;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .favorite-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s ease;
+    z-index: 2;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &__content {
+    width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &__title {
+    margin: 10px 0;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+    color: #333;
+    width: 100%;
+  }
+
+  &__price {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 48px;
+    justify-content: flex-end;
+
+    .price-old {
+      font-size: 14px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .price-new,
+    .price-regular {
+      font-size: 18px;
+      font-weight: 700;
+      color: #000;
+    }
+  }
+
+  &__quantity {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+}
+
+.cart-icon {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  bottom: 10px;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+}
