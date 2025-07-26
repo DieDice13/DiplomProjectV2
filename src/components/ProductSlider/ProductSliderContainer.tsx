@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import ProductSlider from './ProductSlider';
+import { getProductsByCategory } from '../../api/products';
 import type { Product } from '../../types/product';
 
 interface Props {
@@ -8,48 +9,16 @@ interface Props {
 
 const ProductSliderContainer: React.FC<Props> = ({ category }) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const load = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('http://localhost:4000/graphql', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: `
-            query GetProducts($category: String) {
-              products(category: $category) {
-                id
-                name
-                price
-                image
-                discount
-                category
-              }
-            }
-          `,
-            variables: { category },
-          }),
-        });
-
-        const result = await response.json();
-
-        // Приводим к нужному типу, переименовывая поля
-        const formatted = result.data.products.map((product: any) => ({
-          id: product.id,
-          name: product.name, // <-- исправлено!
-          price: product.price,
-          image: product.image,
-          discount: product.discount,
-          category: product.category,
-        }));
-
-        setProducts(formatted);
+        const result = await getProductsByCategory(category); // <-- тут используешь
+        console.log(result);
+        setProducts(result.items);
       } catch (err) {
         setError('Ошибка загрузки товаров');
       } finally {
@@ -57,7 +26,7 @@ const ProductSliderContainer: React.FC<Props> = ({ category }) => {
       }
     };
 
-    fetchProducts();
+    load();
   }, [category]);
 
   if (isLoading) return <p>Загрузка...</p>;

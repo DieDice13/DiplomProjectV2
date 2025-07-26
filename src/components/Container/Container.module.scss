@@ -1,19 +1,12 @@
 ﻿.container {
-  max-width: 1400px;
-  width: 100%;
   margin: 0 auto;
-  box-sizing: border-box;
+  padding: 0 40px;
+  width: 100%;
+  max-width: 1440px; // или другой max-width по макету
 }
 
-@media (max-width: 900px) {
+@media (max-width: 767px) {
   .container {
-    max-width: 100%;
-    padding: 12px;
-  }
-}
-
-@media (max-width: 600px) {
-  .container {
-    padding: 8px;
+    padding: 0 15px;
   }
 }

@@ -13,6 +13,7 @@
     "normalize.css": "^8.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-paginate": "^8.3.0",
     "react-router-dom": "^7.6.3",
     "swiper": "^11.2.10"
   },

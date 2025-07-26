@@ -9,7 +9,6 @@
     grid-template-areas: 'logo catalog search actions';
     align-items: center;
     gap: 1.5rem;
-    border-bottom: 1px solid #ededed;
     position: relative;
 
     &::after {
@@ -123,5 +122,66 @@
 
   &__search-btn {
     display: flex;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .header {
+    &__menu {
+      gap: 1rem;
+    }
+  }
+
+  .header__actions {
+    gap: 10px;
+  }
+
+  .header__action span {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .header {
+    &__menu {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas:
+        'catalog logo actions'
+        'search search search'; // Поиск — на отдельной строке
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    &__catalog_btn {
+      padding: 10px;
+      span {
+        display: none; // скрываем текст "Каталог"
+      }
+
+      .header__catalog_icon {
+        margin-right: 0;
+      }
+    }
+
+    &__logo {
+      justify-self: center;
+    }
+
+    &__search {
+      width: 100%;
+    }
+
+    &__actions {
+      gap: 8px;
+
+      .header__action span {
+        display: none; // скрываем подписи у иконок
+      }
+    }
+
+    &__action {
+      flex-direction: column;
+    }
   }
 }

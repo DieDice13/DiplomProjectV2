@@ -5,9 +5,8 @@
   gap: 16px;
   margin: 16px 0;
 
-  // Автоматически применим нужный grid-area для каждого блока
   > :nth-child(1) {
-    grid-area: 1 / 1 / 3 / 3; // большой блок: слева, на 2 строки и 2 колонки
+    grid-area: 1 / 1 / 3 / 3;
   }
 
   > :nth-child(2) {
@@ -33,6 +32,17 @@
   > :nth-child(7) {
     grid-area: 2 / 5 / 3 / 6;
   }
+
+  // 📱 Мобильный вид: горизонтальный скролл с адаптивной шириной карточек
+  @media (max-width: 767px) {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .category-showcase__item {
@@ -41,9 +51,20 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  @media (max-width: 767px) {
+    flex: 0 0 38vw; // ~292px при ширине 767px, ~122px при ширине 320px
+    scroll-snap-align: start;
+  }
 }
 
 .category-showcase__image {
   max-width: 100%;
   height: auto;
+
+  @media (max-width: 767px) {
+    width: 100%;
+    aspect-ratio: 3 / 2; // сохраняем пропорции 300x200
+    object-fit: cover;
+  }
 }

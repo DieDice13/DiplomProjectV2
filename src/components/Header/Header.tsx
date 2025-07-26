@@ -1,5 +1,5 @@
 ﻿import { Link } from 'react-router-dom';
-import styles from './Header.module.scss'; // Assuming you have a CSS file for styles
+import styles from './Header.module.scss';
 import Container from '../Container/Container';
 import CatalogNav from '../CatalogNav/CatalogNav';
 

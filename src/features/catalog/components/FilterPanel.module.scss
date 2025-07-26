@@ -1,0 +1,18 @@
+﻿@use '../../../styles/vars' as vars;
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-item{
+  display: flex;
+}
+
+.btn_reset_filters {
+  background-color: vars.$siteSelectorColor;
+  color: white;
+  width: 100%;
+  padding: 0.5rem 1rem;
+}

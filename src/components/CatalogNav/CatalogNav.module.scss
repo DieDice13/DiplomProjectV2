@@ -1,6 +1,4 @@
 ﻿.catalog_nav {
-  display: flex;
-  justify-content: space-between;
   position: relative;
   z-index: 1;
   padding: 8px 0;
@@ -13,8 +11,39 @@
     top: 0;
     width: 100vw;
     height: 100%;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.12);
+
     z-index: -1;
     pointer-events: none;
+  }
+}
+
+.catalog_track {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; // для плавности на iOS
+  scrollbar-width: none; // Firefox
+  padding-bottom: 4px;
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari
+  }
+}
+
+.catalog_link {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+  background-color: #f4f4f4;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: #e0e0e0;
   }
 }

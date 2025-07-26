@@ -1,10 +1,10 @@
-﻿// src/routes/index.tsx
+﻿// src/routes/index.ts
 import type { RouteObject } from 'react-router-dom';
-import Home from '../pages/Home';
-import Catalog from '../features/catalog/CatalogPage.tsx';
-import Product from '../pages/Product.tsx';
-import Cart from '../features/cart/CartPage.tsx';
-import NotFound from '../pages/NotFound.tsx';
+import Home from '../pages/HomePage';
+import CatalogPage from '../pages/CatalogPage';
+import Product from '../pages/Product';
+import Cart from '../features/cart/CartPage';
+import NotFound from '../pages/NotFound';
 
 export const routes: RouteObject[] = [
   {
@@ -12,8 +12,8 @@ export const routes: RouteObject[] = [
     element: <Home />,
   },
   {
-    path: '/catalog',
-    element: <Catalog />,
+    path: '/products/:category',
+    element: <CatalogPage />,
   },
   {
     path: '/product/:id',

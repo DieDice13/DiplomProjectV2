@@ -1,0 +1,18 @@
+﻿export const brandImages = [
+  { id: 1, src: '/public/Brands/apple.jpg', alt: 'Apple' },
+  { id: 2, src: '/public/Brands/BOSCH.jpg', alt: 'BOSCH' },
+  { id: 3, src: '/public/Brands/Haier.jpg', alt: 'Haier' },
+  { id: 4, src: '/public/Brands/HONOR.jpg', alt: 'HONOR' },
+  { id: 5, src: '/public/Brands/hp.jpg', alt: 'HP' },
+  { id: 6, src: '/public/Brands/HUAWEI.jpg', alt: 'HUAWEI' },
+  { id: 7, src: '/public/Brands/KitchenAid.jpg', alt: 'KitchenAid' },
+  { id: 8, src: '/public/Brands/LGElectronics.jpg', alt: 'LG Electronics' },
+  { id: 9, src: '/public/Brands/logitech.jpg', alt: 'Logitech' },
+  { id: 10, src: '/public/Brands/MI.jpg', alt: 'MI' },
+  { id: 11, src: '/public/Brands/oppo.jpg', alt: 'Oppo' },
+  { id: 12, src: '/public/Brands/samsung.jpg', alt: 'Samsung' },
+  { id: 13, src: '/public/Brands/SONY.jpg', alt: 'SONY' },
+  { id: 14, src: '/public/Brands/Tefal.jpg', alt: 'Tefal' },
+  { id: 15, src: '/public/Brands/WhirlPool.jpg', alt: 'WhirlPool' },
+  { id: 16, src: '/public/Brands/wmf.jpg', alt: 'WMF' },
+];
