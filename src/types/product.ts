@@ -4,5 +4,7 @@
   image: string;
   price: number;
   discount?: number;
-  category: string;
+  category: {
+    name: string;
+  };
 };

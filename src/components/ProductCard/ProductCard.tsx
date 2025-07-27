@@ -44,7 +44,7 @@ export const ProductCard = ({
   return (
     <div className={`${styles['product-card']} ${className}`}>
       <Link
-        to={`/product/${product.category}/${product.id}`}
+        to={`/product/${product.category.name}/${product.id}`}
         className={styles['product-card__link']}
       >
         <div className={styles['product-card__image-container']}>

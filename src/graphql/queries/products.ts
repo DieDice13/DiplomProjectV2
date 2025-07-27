@@ -13,6 +13,9 @@
         price
         image
         discount
+        category {
+          name
+        }
       }
       totalCount
     }
