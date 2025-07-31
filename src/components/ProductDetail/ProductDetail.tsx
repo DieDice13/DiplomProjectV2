@@ -1,7 +1,9 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchGraphQL } from '../../api/graphqlClient';
+import { useQuery } from '@apollo/client';
 import styles from './ProductDetail.module.scss';
+import { GET_PRODUCT_BY_ID } from '../../graphql/queries/product';
+import { GET_ATTRIBUTES_BY_CATEGORY } from '../../graphql/queries/filters';
 
 type Attribute = {
   key: string;
@@ -19,63 +21,56 @@ type Product = {
   features: Record<string, string>;
 };
 
-const GET_PRODUCT_BY_ID = `
-  query GetProductById($id: String!) {
-    product(id: $id) {
-      id
-      name
-      price
-      discount
-      image
-      description
-      category {
-        name
-      }
-      features
-    }
-  }
-`;
-
-const GET_ATTRIBUTES_BY_CATEGORY = `
-  query GetAttributesByCategory($category: String!) {
-    attributes(category: $category) {
-      key
-      label
-    }
-  }
-`;
-
 export default function ProductDetail() {
   const { id, category } = useParams<{ id: string; category: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [attributes, setAttributes] = useState<Attribute[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  useEffect(() => {
-    if (!id || !category) return;
+  const [reviews] = useState<{ rating: number }[]>([
+    { rating: 4 },
+    { rating: 5 },
+    { rating: 3 },
+    { rating: 4 },
+    { rating: 5 },
+  ]);
 
-    const fetchData = async () => {
-      try {
-        const [productRes, attributesRes] = await Promise.all([
-          fetchGraphQL<{ product: Product }>(GET_PRODUCT_BY_ID, { id }),
-          fetchGraphQL<{ attributes: Attribute[] }>(GET_ATTRIBUTES_BY_CATEGORY, { category }),
-        ]);
-        setProduct(productRes.product);
-        setAttributes(attributesRes.attributes);
-      } catch (err) {
-        console.error('Ошибка при загрузке данных:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const {
+    data: productData,
+    loading: loadingProduct,
+    error: errorProduct,
+  } = useQuery<{ product: Product }>(GET_PRODUCT_BY_ID, {
+    variables: { id: id ?? '' },
+    skip: !id,
+  });
 
-    fetchData();
-  }, [id, category]);
+  const {
+    data: attributesData,
+    loading: loadingAttributes,
+    error: errorAttributes,
+  } = useQuery<{ attributes: Attribute[] }>(GET_ATTRIBUTES_BY_CATEGORY, {
+    variables: { category: category ?? '' },
+    skip: !category,
+  });
 
-  if (loading || !product) return <div>Загрузка...</div>;
+  if (loadingProduct || loadingAttributes) return <div>Загрузка...</div>;
+  if (errorProduct || errorAttributes) return <div>Ошибка при загрузке данных</div>;
+
+  const product = productData?.product;
+  const attributes = attributesData?.attributes ?? [];
+
+  if (!product) return <div>Товар не найден</div>;
 
   const finalPrice = product.price * (1 - product.discount / 100);
+
+  const calculateAverageRating = () => {
+    if (reviews.length === 0) return 0;
+    const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0);
+    return Math.round(sum / reviews.length);
+  };
+
+  const handleFavoriteClick = () => {
+    setIsFavorite(prev => !prev);
+  };
 
   const renderFeatures = () =>
     attributes.map(attr => {
@@ -90,6 +85,38 @@ export default function ProductDetail() {
   return (
     <div className={styles['product-detail']}>
       <h1 className={styles['product-detail__title']}>{product.name}</h1>
+
+      <div className={styles['product-detail__area-user-controls']}>
+        <ul className={styles['product-detail__star-rating']}>
+          {Array.from({ length: 5 }, (_, index) => (
+            <li
+              key={index}
+              className={
+                index < calculateAverageRating() ? styles['product-detail__star--filled'] : ''
+              }
+            >
+              ★
+            </li>
+          ))}
+          <p className={styles['product-detail__star-indicator']}>({reviews.length})</p>
+        </ul>
+
+        <button className={styles['product-detail__favorite-button']} onClick={handleFavoriteClick}>
+          <svg
+            className={`${styles['product-detail__favorite-icon']} ${
+              isFavorite ? styles['product-detail__favorite-icon--active'] : ''
+            }`}
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill={isFavorite ? '#FF0000' : '#5f6368'}
+          >
+            <path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z" />
+          </svg>
+          {isFavorite ? 'В избранном' : 'В избранное'}
+        </button>
+      </div>
 
       <div className={styles['product-detail__content']}>
         <div className={styles['product-detail__img-area']}>

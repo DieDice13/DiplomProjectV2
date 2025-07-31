@@ -1,4 +1,6 @@
-﻿export const GET_PRODUCTS_BY_CATEGORY = `
+﻿import { gql } from '@apollo/client';
+
+export const GET_PRODUCTS_BY_CATEGORY = gql`
   query GetProductsByCategory(
     $category: String!
     $page: Int!

@@ -2,9 +2,10 @@
 import type { RouteObject } from 'react-router-dom';
 import Home from '../pages/HomePage';
 import CatalogPage from '../pages/CatalogPage';
-import Cart from '../features/cart/CartPage';
 import NotFound from '../pages/NotFound';
 import ProductDetailPage from '../pages/ProductDetailPage';
+import CartPage from '../pages/CartPage';
+import FavoritesPage from '../pages/FavoritesPage';
 
 export const routes: RouteObject[] = [
   {
@@ -21,7 +22,11 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/cart',
-    element: <Cart />,
+    element: <CartPage />,
+  },
+  {
+    path: '/favorites',
+    element: <FavoritesPage />,
   },
   {
     path: '*',

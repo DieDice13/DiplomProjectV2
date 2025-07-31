@@ -1,37 +1,24 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import ProductCard from '../../components/ProductCard/ProductCard';
-import { getProductsByCategory } from '../../api/products';
-import { getAttributesByCategory } from '../../api/filters';
 import { SortAndFilter } from './components/SortAndFilter';
+import { useProductsByCategory } from '../../api/products';
+import { useAttributesByCategory } from '../../api/filters';
 
 import styles from './Catalog.module.scss';
 
+import type { SortOption, SelectedFilters } from './components/types';
 import type { Product } from '../../types/product';
-import type {
-  AttributeWithValues,
-  SelectedFilters,
-  SortOption,
-  NormalizedFilters,
-} from './components/types';
 
 const itemsPerPage = 12;
 
 const Catalog = () => {
   const { category } = useParams<{ category: string }>();
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
-
-  const [availableFilters, setAvailableFilters] = useState<AttributeWithValues[]>([]);
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
   const [sort, setSort] = useState<SortOption | undefined>(undefined);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [currentPage, setCurrentPage] = useState(0);
 
   const mapToDbCategory = (paramCategory: string) => {
     const map: Record<string, string> = {
@@ -54,52 +41,33 @@ const Catalog = () => {
     return categoryMap[category] || category.charAt(0).toUpperCase() + category.slice(1);
   };
 
-  useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        const dbCategory = mapToDbCategory(category!);
-        const fetchedFilters = await getAttributesByCategory(dbCategory);
-        setAvailableFilters(fetchedFilters);
-      } catch (err) {
-        if (err instanceof Error) {
-          console.error('Ошибка при загрузке фильтров:', err.message, err);
-        }
-      }
-    };
+  const dbCategory = mapToDbCategory(category!);
 
-    fetchFilters();
-  }, [category]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const dbCategory = mapToDbCategory(category!);
-
-        const normalizedFilters: NormalizedFilters = Object.fromEntries(
+  const normalizedFilters =
+    Object.keys(selectedFilters).length > 0
+      ? Object.fromEntries(
           Object.entries(selectedFilters).map(([key, set]) => [key, Array.from(set)]),
-        );
+        )
+      : undefined;
 
-        const data = await getProductsByCategory(
-          dbCategory,
-          currentPage,
-          itemsPerPage,
-          Object.keys(normalizedFilters).length > 0 ? normalizedFilters : undefined,
-          sort ?? undefined,
-        );
+  const {
+    products,
+    totalCount,
+    loading: loadingProducts,
+    error: errorProducts,
+  } = useProductsByCategory({
+    category: dbCategory,
+    page: currentPage,
+    limit: itemsPerPage,
+    filters: normalizedFilters,
+    sort: sort,
+  });
 
-        setProducts(data.items);
-        setTotalCount(data.totalCount);
-        setError(null);
-      } catch (err) {
-        setError('Не удалось загрузить продукты. Попробуйте позже.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [category, currentPage, selectedFilters, sort]);
+  const {
+    attributes: availableFilters,
+    loading: loadingFilters,
+    error: errorFilters,
+  } = useAttributesByCategory(dbCategory);
 
   const handleFilterChange = (newFilters: SelectedFilters) => {
     setSelectedFilters(newFilters);
@@ -115,12 +83,12 @@ const Catalog = () => {
     setExpanded(prev => ({ ...prev, [param]: !prev[param] }));
   };
 
-  if (loading) return <p>Загрузка продуктов...</p>;
+  if (loadingProducts || loadingFilters) return <p>Загрузка продуктов...</p>;
 
-  if (error) {
+  if (errorProducts || errorFilters) {
     return (
       <div className={styles.catalog}>
-        <p>{error}</p>
+        <p>Не удалось загрузить продукты. Попробуйте позже.</p>
         <button onClick={() => window.location.reload()} className={styles.retryButton}>
           Попробовать снова
         </button>
@@ -132,7 +100,7 @@ const Catalog = () => {
     return <div className={styles.catalog}>По заданным параметрам ничего не найдено.</div>;
   }
 
-  const sortProducts = (products: Product[], sort?: SortOption): Product[] => {
+  const sortProducts = (products: Product[], sort?: SortOption) => {
     return [...products].sort((a, b) => {
       const finalA = a.price * (1 - (a.discount ?? 0) / 100);
       const finalB = b.price * (1 - (b.discount ?? 0) / 100);

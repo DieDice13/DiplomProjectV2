@@ -3,27 +3,26 @@ import type { Product } from '../../types/product';
 import styles from './ProductCard.module.scss';
 import FavoriteIcon from '../../assets/icons/favorite-svgrepo-com.svg?react';
 import AddToCartIcon from '../../assets/icons/add-to-cart-svgrepo-com.svg?react';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { addToCart } from '../../features/cart/cartSlice';
+import { useAppSelector } from '../../hooks/useAppSelector';
+import { addToFavorites, removeFromFavorites } from '../../features/favorites/favoritesSlice'; // ← заменить импорт
 
 type ProductCardProps = {
   product: Product;
   className?: string;
-  isFavorite?: boolean;
-  onFavoriteToggle?: (id: number) => void;
-  inCart?: boolean;
-  onAddToCart?: (product: Product) => void;
-  quantity?: number;
-  onQuantityChange?: (id: number, quantity: number) => void;
 };
 
-export const ProductCard = ({
-  product,
-  className = '',
-  inCart = false,
-  onAddToCart,
-  quantity = 1,
-  onQuantityChange,
-  isFavorite = false,
-}: ProductCardProps) => {
+export const ProductCard = ({ product, className = '' }: ProductCardProps) => {
+  const dispatch = useAppDispatch();
+
+  const cartItems = useAppSelector(state => state.cart.items);
+  const cartItem = cartItems.find(item => item.id === product.id.toString());
+  const quantityInCart = cartItem?.quantity ?? 0;
+
+  const favorites = useAppSelector(state => state.favorites.items); // ← получить избранное
+  const isFavorite = favorites.some(f => f.id === product.id); // ← проверить наличие
+
   const hasDiscount = !!product.discount;
   const discountedPrice = hasDiscount
     ? (product.price * (1 - product.discount! / 100)).toFixed(2)
@@ -32,13 +31,20 @@ export const ProductCard = ({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onAddToCart?.(product);
-  };
 
-  const handleQuantityChange = (delta: number) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onQuantityChange?.(product.id, Math.max(1, quantity + delta));
+    const finalPrice = product.price * (1 - (product.discount ?? 0) / 100);
+
+    dispatch(
+      addToCart({
+        id: product.id.toString(),
+        name: product.name,
+        image: product.image,
+        price: finalPrice,
+        discount: product.discount ?? 0,
+        category: product.category.name,
+        quantity: 1,
+      }),
+    );
   };
 
   return (
@@ -55,8 +61,21 @@ export const ProductCard = ({
         </div>
 
         <FavoriteIcon
-          className={isFavorite ? styles['favorite-icon--active'] : styles['favorite-icon']}
+          style={{ width: 24, height: 24 }}
+          className={`${styles['favorite-icon']} ${
+            isFavorite ? styles['favorite-icon--active'] : ''
+          }`}
           aria-label="Добавить в избранное"
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (isFavorite) {
+              dispatch(removeFromFavorites(product.id));
+            } else {
+              dispatch(addToFavorites(product));
+            }
+          }}
         />
 
         <div className={styles['product-card__content']}>
@@ -75,16 +94,15 @@ export const ProductCard = ({
         </div>
       </Link>
 
-      <div className={styles['product-card__quantity']}>
-        {inCart ? (
-          <>
-            <button onClick={handleQuantityChange(-1)}>-</button>
-            <span>{quantity}</span>
-            <button onClick={handleQuantityChange(1)}>+</button>
-          </>
-        ) : (
+      <div className={styles['product-card__cart-button-container']}>
+        {quantityInCart === 0 ? (
           <button className={styles['add-to-cart-btn']} onClick={handleAddToCart}>
             <AddToCartIcon className={styles['cart-icon']} aria-label="Добавить в корзину" />
+          </button>
+        ) : (
+          <button className={styles['added-btn']} onClick={handleAddToCart}>
+            +1 шт
+            <span className={styles['added-btn__quantity']}>{quantityInCart}</span>
           </button>
         )}
       </div>

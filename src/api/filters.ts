@@ -1,12 +1,19 @@
-﻿import { fetchGraphQL } from './graphqlClient';
+﻿import { useQuery } from '@apollo/client';
 import { GET_ATTRIBUTES_BY_CATEGORY } from '../graphql/queries/filters';
 import type { AttributeWithValues } from '../features/catalog/components/types';
 
-export const getAttributesByCategory = async (category: string): Promise<AttributeWithValues[]> => {
-  const data = await fetchGraphQL<{ attributes: AttributeWithValues[] }>(
+export const useAttributesByCategory = (category: string) => {
+  const { data, loading, error } = useQuery<{ attributes: AttributeWithValues[] }>(
     GET_ATTRIBUTES_BY_CATEGORY,
-    { category },
+    {
+      variables: { category },
+      skip: !category,
+    },
   );
 
-  return data.attributes;
+  return {
+    attributes: data?.attributes ?? [],
+    loading,
+    error,
+  };
 };

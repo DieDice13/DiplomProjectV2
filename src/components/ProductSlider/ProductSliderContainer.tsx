@@ -1,36 +1,25 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useQuery } from '@apollo/client';
 import ProductSlider from './ProductSlider';
-import { getProductsByCategory } from '../../api/products';
 import type { Product } from '../../types/product';
+import { GET_PRODUCTS_FOR_SLIDER } from '../../graphql/queries/productsForSlider';
 
 interface Props {
   category: string;
 }
 
 const ProductSliderContainer: React.FC<Props> = ({ category }) => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error } = useQuery(GET_PRODUCTS_FOR_SLIDER, {
+    variables: { category },
+  });
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setIsLoading(true);
-        const result = await getProductsByCategory(category); // <-- тут используешь
-        console.log(result);
-        setProducts(result.items);
-      } catch (err) {
-        setError('Ошибка загрузки товаров');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  if (loading) return <p>Загрузка...</p>;
+  if (error) {
+    console.error('Ошибка GraphQL:', error);
+    return <p>Ошибка загрузки товаров</p>;
+  }
 
-    load();
-  }, [category]);
+  const products: Product[] = data?.products?.items || [];
 
-  if (isLoading) return <p>Загрузка...</p>;
-  if (error) return <p>{error}</p>;
   if (products.length === 0) return <p>Нет товаров в категории</p>;
 
   return <ProductSlider products={products} />;

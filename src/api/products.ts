@@ -1,17 +1,33 @@
-﻿import { GET_PRODUCTS_BY_CATEGORY } from '../graphql/queries/products';
-import { fetchGraphQL } from './graphqlClient';
+﻿import { useQuery } from '@apollo/client';
+import { GET_PRODUCTS_BY_CATEGORY } from '../graphql/queries/products';
 import type { Product } from '../types/product';
 
-export const getProductsByCategory = async (
-  category: string,
-  page = 0,
-  limit = 10,
-  filters?: Record<string, string[]>,
-  sort?: 'PRICE_ASC' | 'PRICE_DESC' | 'NAME_ASC' | 'NAME_DESC',
-): Promise<{ items: Product[]; totalCount: number }> => {
-  const data = await fetchGraphQL<{
-    products: { items: Product[]; totalCount: number };
-  }>(GET_PRODUCTS_BY_CATEGORY, { category, page, limit, filters, sort });
+interface UseProductsOptions {
+  category: string;
+  page: number;
+  limit: number;
+  filters?: Record<string, string[]>;
+  sort?: 'PRICE_ASC' | 'PRICE_DESC' | 'NAME_ASC' | 'NAME_DESC';
+}
 
-  return data.products;
+export const useProductsByCategory = ({
+  category,
+  page,
+  limit,
+  filters,
+  sort,
+}: UseProductsOptions) => {
+  const { data, loading, error } = useQuery<{
+    products: { items: Product[]; totalCount: number };
+  }>(GET_PRODUCTS_BY_CATEGORY, {
+    variables: { category, page, limit, filters, sort },
+    skip: !category,
+  });
+
+  return {
+    products: data?.products.items ?? [],
+    totalCount: data?.products.totalCount ?? 0,
+    loading,
+    error,
+  };
 };
