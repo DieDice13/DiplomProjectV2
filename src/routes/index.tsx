@@ -6,6 +6,7 @@ import NotFound from '../pages/NotFound';
 import ProductDetailPage from '../pages/ProductDetailPage';
 import CartPage from '../pages/CartPage';
 import FavoritesPage from '../pages/FavoritesPage';
+import AuthPage from '../pages/AuthPage';
 
 export const routes: RouteObject[] = [
   {
@@ -27,6 +28,10 @@ export const routes: RouteObject[] = [
   {
     path: '/favorites',
     element: <FavoritesPage />,
+  },
+  {
+    path: '/auth',
+    element: <AuthPage />,
   },
   {
     path: '*',

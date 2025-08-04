@@ -56,7 +56,7 @@ const Header = () => {
           </form>
 
           <nav className={styles.header__actions}>
-            <Link to="/profile" className={styles.header__action} aria-label="Профиль">
+            <Link to="/auth" className={styles.header__action} aria-label="Профиль">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="32px"

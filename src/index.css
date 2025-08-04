@@ -1,10 +1,13 @@
-/* src/styles/base.scss */
-
-@import 'normalize.css';
+/* @import 'normalize.css'; */
+@import "tailwindcss";
 
 :root {
   --text-color: #222;
   --bg-color: #fff;
+
+  --site-selector-color: #6c5ce7;
+  --site-selector-hover: #836fff;
+  --pagination-active-color: #007bff;
 
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -16,8 +19,6 @@
 }
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -32,8 +33,5 @@ a {
 }
 
 button {
-  font-family: inherit;
   cursor: pointer;
-  border: none;
-  background: none;
 }

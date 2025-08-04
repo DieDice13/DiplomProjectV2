@@ -11,15 +11,20 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",
+    "@hookform/resolvers": "^5.2.1",
     "@reduxjs/toolkit": "^2.8.2",
+    "@tailwindcss/vite": "^4.1.11",
     "graphql": "^16.11.0",
     "normalize.css": "^8.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hook-form": "^7.62.0",
     "react-paginate": "^8.3.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.3",
-    "swiper": "^11.2.10"
+    "swiper": "^11.2.10",
+    "tailwindcss": "^4.1.11",
+    "yup": "^1.7.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
