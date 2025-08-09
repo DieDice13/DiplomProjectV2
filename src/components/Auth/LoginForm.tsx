@@ -2,9 +2,12 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { useMutation } from '@apollo/client';
-import { LOGIN_USER } from '../../graphql/mutations';
+import { LOGIN_USER } from '../../graphql/mutations/auth';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { setUser } from '../../features/auth/authSlice';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { useFavorites } from '../../hooks/useFavorites'; // или скорректируй путь
 
 type LoginFormInputs = {
   email: string;
@@ -24,6 +27,8 @@ const loginSchema = Yup.object({
 const LoginForm = ({ onSwitch, inputClass }: LoginFormProps) => {
   const dispatch = useAppDispatch();
   const [login, { loading, error }] = useMutation(LOGIN_USER);
+  const navigate = useNavigate();
+  const { syncFavorites } = useFavorites();
 
   const {
     register,
@@ -38,8 +43,14 @@ const LoginForm = ({ onSwitch, inputClass }: LoginFormProps) => {
     try {
       const response = await login({ variables: data });
       const { token, user } = response.data.login;
+
       localStorage.setItem('token', token);
       dispatch(setUser(user));
+
+      await syncFavorites(); // ← СИНХРОНИЗАЦИЯ ИЗБРАННЫХ
+
+      toast.success('Успешный вход'); // ← уведомление
+      navigate('/profile'); // ← редирект
     } catch (err: any) {
       const message = err?.graphQLErrors?.[0]?.message || 'Ошибка входа';
 
@@ -50,6 +61,7 @@ const LoginForm = ({ onSwitch, inputClass }: LoginFormProps) => {
         setError('root', { type: 'manual', message });
       }
 
+      toast.error('Ошибка авторизации'); // ← можно и здесь
       console.error('Ошибка входа:', err);
     }
   };

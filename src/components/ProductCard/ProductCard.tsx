@@ -6,22 +6,23 @@ import AddToCartIcon from '../../assets/icons/add-to-cart-svgrepo-com.svg?react'
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToCart } from '../../features/cart/cartSlice';
 import { useAppSelector } from '../../hooks/useAppSelector';
-import { addToFavorites, removeFromFavorites } from '../../features/favorites/favoritesSlice'; // ← заменить импорт
+import { useFavorites } from '../../hooks/useFavorites';
 
 type ProductCardProps = {
   product: Product;
   className?: string;
+  onToggleFavorite?: () => void;
 };
 
-export const ProductCard = ({ product, className = '' }: ProductCardProps) => {
+export const ProductCard = ({ product, className = '', onToggleFavorite }: ProductCardProps) => {
   const dispatch = useAppDispatch();
 
   const cartItems = useAppSelector(state => state.cart.items);
   const cartItem = cartItems.find(item => item.id === product.id.toString());
   const quantityInCart = cartItem?.quantity ?? 0;
 
-  const favorites = useAppSelector(state => state.favorites.items); // ← получить избранное
-  const isFavorite = favorites.some(f => f.id === product.id); // ← проверить наличие
+  const { favorites, toggleFavorite } = useFavorites();
+  const isFavorite = favorites.some((f: { id: number }) => f.id === product.id);
 
   const hasDiscount = !!product.discount;
   const discountedPrice = hasDiscount
@@ -69,11 +70,10 @@ export const ProductCard = ({ product, className = '' }: ProductCardProps) => {
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
-
-            if (isFavorite) {
-              dispatch(removeFromFavorites(product.id));
+            if (onToggleFavorite) {
+              onToggleFavorite();
             } else {
-              dispatch(addToFavorites(product));
+              toggleFavorite(product, isFavorite);
             }
           }}
         />

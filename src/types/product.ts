@@ -7,4 +7,5 @@
   category: {
     name: string;
   };
+  isFavorite?: boolean; // добавлено
 };

@@ -1,5 +1,4 @@
 ﻿import type { CartState } from '../features/cart/cartSlice';
-import type { FavoritesState } from '../features/favorites/favoritesSlice'; // добавь, если нужно
 
 export const loadCartState = (): CartState | undefined => {
   try {
@@ -27,26 +26,19 @@ export const saveCartState = (state: CartState): void => {
 
 // ⬇️ новые функции для избранного
 
-export const loadFavoritesState = (): FavoritesState | undefined => {
+// utils/localStorage.ts
+export const loadFavoritesState = () => {
   try {
     const serializedState = localStorage.getItem('favorites');
-    if (!serializedState) return undefined;
-    return JSON.parse(serializedState) as FavoritesState;
-  } catch (err) {
-    if (import.meta.env.DEV) {
-      console.error('Ошибка загрузки состояния избранного:', err);
-    }
-    return undefined;
+    return serializedState ? JSON.parse(serializedState) : null;
+  } catch {
+    return null;
   }
 };
 
-export const saveFavoritesState = (state: FavoritesState): void => {
+export const saveFavoritesState = (state: any) => {
   try {
     const serializedState = JSON.stringify(state);
     localStorage.setItem('favorites', serializedState);
-  } catch (err) {
-    if (import.meta.env.DEV) {
-      console.error('Ошибка сохранения состояния избранного:', err);
-    }
-  }
+  } catch {}
 };

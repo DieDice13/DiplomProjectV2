@@ -9,12 +9,12 @@ interface User {
 
 interface AuthState {
   user: User | null;
-  isAuthenticated: boolean;
+  isAuthInitialized: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: false,
+  isAuthInitialized: false,
 };
 
 const authSlice = createSlice({
@@ -23,15 +23,19 @@ const authSlice = createSlice({
   reducers: {
     setUser(state, action: PayloadAction<User>) {
       state.user = action.payload;
-      state.isAuthenticated = true;
+      state.isAuthInitialized = true;
+    },
+    clearUser(state) {
+      state.user = null;
+      state.isAuthInitialized = true;
     },
     logout(state) {
       state.user = null;
-      state.isAuthenticated = false;
+      state.isAuthInitialized = false;
       localStorage.removeItem('token');
     },
   },
 });
 
-export const { setUser, logout } = authSlice.actions;
+export const { setUser, clearUser, logout } = authSlice.actions;
 export default authSlice.reducer;

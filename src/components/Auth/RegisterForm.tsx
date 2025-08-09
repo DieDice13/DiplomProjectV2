@@ -2,9 +2,12 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useMutation } from '@apollo/client';
-import { REGISTER_USER } from '../../graphql/mutations';
+import { REGISTER_USER } from '../../graphql/mutations/auth';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { setUser } from '../../features/auth/authSlice';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { useFavorites } from '../../hooks/useFavorites';
 
 type RegisterFormData = {
   email: string;
@@ -26,6 +29,8 @@ const schema = yup.object().shape({
 const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
   const dispatch = useAppDispatch();
   const [registerUser, { loading }] = useMutation(REGISTER_USER);
+  const navigate = useNavigate();
+  const { syncFavorites } = useFavorites();
 
   const {
     register,
@@ -40,9 +45,16 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
     try {
       const result = await registerUser({ variables: data });
       const { token, user } = result.data.register;
+
       localStorage.setItem('token', token);
       dispatch(setUser(user));
-      onRegisterSuccess();
+
+      await syncFavorites(); // ← СИНХРОНИЗАЦИЯ ИЗБРАННЫХ
+
+      toast.success('Регистрация прошла успешно');
+      navigate('/profile'); // ← редирект
+
+      onRegisterSuccess(); // ← переключение формы, если нужно
     } catch (err: any) {
       const message = err?.graphQLErrors?.[0]?.message || 'Ошибка регистрации';
 
@@ -52,6 +64,7 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
         setError('root', { type: 'manual', message });
       }
 
+      toast.error('Ошибка регистрации');
       console.error('Ошибка при регистрации:', err);
     }
   };

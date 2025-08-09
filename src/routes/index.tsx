@@ -7,6 +7,7 @@ import ProductDetailPage from '../pages/ProductDetailPage';
 import CartPage from '../pages/CartPage';
 import FavoritesPage from '../pages/FavoritesPage';
 import AuthPage from '../pages/AuthPage';
+import ProfilePage from '../pages/ProfilePage';
 
 export const routes: RouteObject[] = [
   {
@@ -32,6 +33,10 @@ export const routes: RouteObject[] = [
   {
     path: '/auth',
     element: <AuthPage />,
+  },
+  {
+    path: '/profile',
+    element: <ProfilePage />,
   },
   {
     path: '*',
