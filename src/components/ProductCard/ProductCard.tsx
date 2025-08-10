@@ -1,12 +1,10 @@
 ﻿import { Link } from 'react-router-dom';
-import type { Product } from '../../types/product';
 import styles from './ProductCard.module.scss';
 import FavoriteIcon from '../../assets/icons/favorite-svgrepo-com.svg?react';
 import AddToCartIcon from '../../assets/icons/add-to-cart-svgrepo-com.svg?react';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { addToCart } from '../../features/cart/cartSlice';
-import { useAppSelector } from '../../hooks/useAppSelector';
 import { useFavorites } from '../../hooks/useFavorites';
+import { useCart } from '../../hooks/useCart';
+import type { Product } from '../../types/product';
 
 type ProductCardProps = {
   product: Product;
@@ -15,14 +13,13 @@ type ProductCardProps = {
 };
 
 export const ProductCard = ({ product, className = '', onToggleFavorite }: ProductCardProps) => {
-  const dispatch = useAppDispatch();
-
-  const cartItems = useAppSelector(state => state.cart.items);
-  const cartItem = cartItems.find(item => item.id === product.id.toString());
-  const quantityInCart = cartItem?.quantity ?? 0;
-
+  const { cartItems, addToCart } = useCart();
   const { favorites, toggleFavorite } = useFavorites();
+
   const isFavorite = favorites.some((f: { id: number }) => f.id === product.id);
+
+  // Количество в корзине
+  const quantityInCart = cartItems.find(item => item.product.id === product.id)?.quantity ?? 0;
 
   const hasDiscount = !!product.discount;
   const discountedPrice = hasDiscount
@@ -33,19 +30,10 @@ export const ProductCard = ({ product, className = '', onToggleFavorite }: Produ
     e.preventDefault();
     e.stopPropagation();
 
-    const finalPrice = product.price * (1 - (product.discount ?? 0) / 100);
-
-    dispatch(
-      addToCart({
-        id: product.id.toString(),
-        name: product.name,
-        image: product.image,
-        price: finalPrice,
-        discount: product.discount ?? 0,
-        category: product.category.name,
-        quantity: 1,
-      }),
-    );
+    // Передаём весь объект product — useCart сделает оптимистичный апдейт и отправит mutation
+    addToCart(product, 1).catch(err => {
+      console.error('Ошибка добавления в корзину', err);
+    });
   };
 
   return (

@@ -1,32 +1,34 @@
-﻿import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { useAppSelector } from '../../hooks/useAppSelector';
-import { removeFromCart, updateQuantity } from './cartSlice';
+﻿import { useCart } from '../../hooks/useCart';
 import { Link } from 'react-router-dom';
 import styles from './Cart.module.scss';
+import type { CartItem } from '../../types/CartItem';
 
-const CartPage = () => {
-  const cartItems = useAppSelector(state => state.cart.items);
-  const dispatch = useAppDispatch();
+const Cart = () => {
+  const { cartItems, updateQuantity, removeFromCart, loading } = useCart();
 
   const handleQuantityChange = (productId: string, delta: number) => {
-    const item = cartItems.find(item => item.id === productId);
+    const item = cartItems.find((item: CartItem) => item.id === productId);
     if (!item) return;
     const newQuantity = item.quantity + delta;
-
-    dispatch(updateQuantity({ id: productId, quantity: newQuantity }));
+    if (newQuantity < 1) return;
+    updateQuantity(productId, newQuantity);
   };
 
   const handleRemove = (productId: string) => {
-    dispatch(removeFromCart(productId));
+    removeFromCart(productId);
   };
 
   const getFinalPrice = (price: number, discount?: number) =>
     discount ? price * (1 - discount / 100) : price;
 
   const total = cartItems.reduce(
-    (sum, item) => sum + getFinalPrice(item.price, item.discount) * item.quantity,
+    (sum: number, item: CartItem) => sum + getFinalPrice(item.price, item.discount) * item.quantity,
     0,
   );
+
+  if (loading) {
+    return <p>Загрузка корзины...</p>;
+  }
 
   return (
     <div className={styles.cart}>
@@ -38,7 +40,7 @@ const CartPage = () => {
         <div className={styles['cart-content']}>
           <div className={styles['cart-items']}>
             <ul className={styles['cart-list']}>
-              {cartItems.map(item => (
+              {cartItems.map((item: CartItem) => (
                 <li className={styles.item} key={item.id}>
                   <Link to={`/product/${item.category}/${item.id}`}>
                     <img src={item.image} alt={item.name} className={styles.image} />
@@ -51,22 +53,19 @@ const CartPage = () => {
 
                     <div className={styles.controls}>
                       <button
-                        className={`${styles.decrease} decrease`}
+                        className={styles.decrease}
                         onClick={() => handleQuantityChange(item.id, -1)}
                       >
                         -
                       </button>
                       <span>{item.quantity}</span>
                       <button
-                        className={`${styles.increase} increase`}
+                        className={styles.increase}
                         onClick={() => handleQuantityChange(item.id, 1)}
                       >
                         +
                       </button>
-                      <button
-                        className={`${styles.remove} remove`}
-                        onClick={() => handleRemove(item.id)}
-                      >
+                      <button className={styles.remove} onClick={() => handleRemove(item.id)}>
                         Удалить
                       </button>
                     </div>
@@ -96,4 +95,4 @@ const CartPage = () => {
   );
 };
 
-export default CartPage;
+export default Cart;

@@ -14,6 +14,10 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    // заменяем весь список (используется при загрузке с сервера)
+    setCartItems(state, action: PayloadAction<CartItem[]>) {
+      state.items = action.payload;
+    },
     addToCart(state, action: PayloadAction<CartItem>) {
       const existingItem = state.items.find(item => item.id === action.payload.id);
       if (existingItem) {
@@ -30,10 +34,8 @@ const cartSlice = createSlice({
       if (!item) return;
 
       if (action.payload.quantity <= 0) {
-        // Удаляем товар из корзины, если количество стало 0 или меньше
         state.items = state.items.filter(item => item.id !== action.payload.id);
       } else {
-        // Иначе просто обновляем количество
         item.quantity = action.payload.quantity;
       }
     },
@@ -43,5 +45,6 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart } = cartSlice.actions;
+export const { setCartItems, addToCart, removeFromCart, updateQuantity, clearCart } =
+  cartSlice.actions;
 export default cartSlice.reducer;
