@@ -1,7 +1,7 @@
 ﻿import { gql } from '@apollo/client';
 
 export const GET_PRODUCT_BY_ID = gql`
-  query GetProductById($id: String!) {
+  query GetProductById($id: Int!) {
     product(id: $id) {
       id
       name

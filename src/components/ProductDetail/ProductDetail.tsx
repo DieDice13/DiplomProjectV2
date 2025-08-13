@@ -4,43 +4,36 @@ import { useQuery } from '@apollo/client';
 import styles from './ProductDetail.module.scss';
 import { GET_PRODUCT_BY_ID } from '../../graphql/queries/product';
 import { GET_ATTRIBUTES_BY_CATEGORY } from '../../graphql/queries/filters';
+import Reviews from '../../features/reviews/Reviews';
+import { GET_REVIEWS_BY_PRODUCT } from '../../graphql/queries/reviews';
+import { useFavorites } from '../../hooks/useFavorites';
+import type { ProductDetailType } from '../../types/ProductDetail';
 
 type Attribute = {
   key: string;
   label: string;
 };
 
-type Product = {
+type Review = {
   id: string;
-  name: string;
-  price: number;
-  discount: number;
-  image: string;
-  description: string;
-  category: { name: string };
-  features: Record<string, string>;
+  rating: number;
+  comment?: string;
 };
 
 export default function ProductDetail() {
   const { id, category } = useParams<{ id: string; category: string }>();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { favorites, toggleFavorite } = useFavorites(); // перенесли наверх
 
-  const [reviews] = useState<{ rating: number }[]>([
-    { rating: 4 },
-    { rating: 5 },
-    { rating: 3 },
-    { rating: 4 },
-    { rating: 5 },
-  ]);
+  const productIdInt = id && /^\d+$/.test(id) ? parseInt(id, 10) : undefined;
 
   const {
     data: productData,
     loading: loadingProduct,
     error: errorProduct,
-  } = useQuery<{ product: Product }>(GET_PRODUCT_BY_ID, {
-    variables: { id: id ?? '' },
-    skip: !id,
+  } = useQuery<{ product: ProductDetailType }>(GET_PRODUCT_BY_ID, {
+    variables: { id: productIdInt ?? 0 },
+    skip: !productIdInt,
   });
 
   const {
@@ -52,29 +45,50 @@ export default function ProductDetail() {
     skip: !category,
   });
 
-  if (loadingProduct || loadingAttributes) return <div>Загрузка...</div>;
-  if (errorProduct || errorAttributes) return <div>Ошибка при загрузке данных</div>;
+  const {
+    data: reviewsData,
+    loading: loadingReviews,
+    error: errorReviews,
+  } = useQuery<{ reviewsByProduct: Review[] }>(GET_REVIEWS_BY_PRODUCT, {
+    variables: { productId: productIdInt ?? 0 },
+    skip: !productIdInt,
+  });
+
+  // ранний выход после хуков
+  if (loadingProduct || loadingAttributes || loadingReviews) {
+    return <div>Загрузка...</div>;
+  }
+
+  if (errorProduct || errorAttributes || errorReviews) {
+    return <div>Ошибка при загрузке данных</div>;
+  }
 
   const product = productData?.product;
   const attributes = attributesData?.attributes ?? [];
+  const reviews = reviewsData?.reviewsByProduct ?? [];
 
-  if (!product) return <div>Товар не найден</div>;
+  if (!product) {
+    return <div>Товар не найден</div>;
+  }
 
-  const finalPrice = product.price * (1 - product.discount / 100);
+  const discount = product.discount ?? 0;
+  const finalPrice = product.price * (1 - discount / 100);
 
   const calculateAverageRating = () => {
     if (reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0);
-    return Math.round(sum / reviews.length);
+    return sum / reviews.length;
   };
 
+  const isFavorite = favorites.some(f => f.id === Number(product.id));
+
   const handleFavoriteClick = () => {
-    setIsFavorite(prev => !prev);
+    toggleFavorite(product, isFavorite);
   };
 
   const renderFeatures = () =>
     attributes.map(attr => {
-      const value = product.features[attr.key];
+      const value = product.features?.[attr.key];
       return value ? (
         <li key={attr.key}>
           <strong>{attr.label}:</strong> {value}
@@ -82,25 +96,58 @@ export default function ProductDetail() {
       ) : null;
     });
 
+  const Star = ({ fillPercentage, size = 24 }: { fillPercentage: number; size?: number }) => {
+    const clipId = `clip-${Math.random()}`;
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ marginRight: 4 }}
+        aria-hidden="true"
+      >
+        <defs>
+          <clipPath id={clipId}>
+            <rect x="0" y="0" width={`${fillPercentage}%`} height="24" />
+          </clipPath>
+        </defs>
+        <path
+          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+          fill="#ccc"
+        />
+        <path
+          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+          fill="#FFC107"
+          clipPath={`url(#${clipId})`}
+        />
+      </svg>
+    );
+  };
+
+  const StarRating = ({ rating }: { rating: number }) => {
+    const stars = [];
+    for (let i = 0; i < 5; i++) {
+      let fillPercentage = 0;
+      if (rating >= i + 1) fillPercentage = 100;
+      else if (rating > i) fillPercentage = (rating - i) * 100;
+      stars.push(<Star key={i} fillPercentage={fillPercentage} size={20} />);
+    }
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {stars}
+        <span style={{ marginLeft: 8, fontSize: 14, color: '#555' }}>({reviews.length})</span>
+      </div>
+    );
+  };
+
   return (
     <div className={styles['product-detail']}>
       <h1 className={styles['product-detail__title']}>{product.name}</h1>
 
       <div className={styles['product-detail__area-user-controls']}>
-        <ul className={styles['product-detail__star-rating']}>
-          {Array.from({ length: 5 }, (_, index) => (
-            <li
-              key={index}
-              className={
-                index < calculateAverageRating() ? styles['product-detail__star--filled'] : ''
-              }
-            >
-              ★
-            </li>
-          ))}
-          <p className={styles['product-detail__star-indicator']}>({reviews.length})</p>
-        </ul>
-
+        <StarRating rating={calculateAverageRating()} />
         <button className={styles['product-detail__favorite-button']} onClick={handleFavoriteClick}>
           <svg
             className={`${styles['product-detail__favorite-icon']} ${
@@ -120,7 +167,7 @@ export default function ProductDetail() {
 
       <div className={styles['product-detail__content']}>
         <div className={styles['product-detail__img-area']}>
-          <img src={product.image} alt={product.name} />
+          <img src={product.image ?? ''} alt={product.name} />
         </div>
 
         <section className={styles['product-detail__features']}>
@@ -148,7 +195,7 @@ export default function ProductDetail() {
 
         <div className={styles['product-detail__price-block']}>
           <div className={styles['product-detail__price']}>
-            {product.discount > 0 ? (
+            {discount > 0 ? (
               <>
                 <span className={styles['product-detail__price-old']}>
                   {product.price.toFixed(2)} ₸
@@ -157,9 +204,7 @@ export default function ProductDetail() {
                   <span className={styles['product-detail__price-new']}>
                     {finalPrice.toFixed(2)} ₸
                   </span>
-                  <span className={styles['product-detail__price-discount']}>
-                    -{product.discount}%
-                  </span>
+                  <span className={styles['product-detail__price-discount']}>-{discount}%</span>
                 </div>
               </>
             ) : (
@@ -172,6 +217,8 @@ export default function ProductDetail() {
           <button className={styles['product-detail__buy-button']}>В корзину</button>
         </div>
       </div>
+
+      <Reviews productId={product.id} />
     </div>
   );
 }

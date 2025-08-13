@@ -9,7 +9,7 @@ export const useAuthInit = () => {
   const [getCurrentUser] = useLazyQuery(GET_CURRENT_USER);
 
   useEffect(() => {
-    console.log('🔥 useAuthInit сработал');
+    // console.log('🔥 useAuthInit сработал');
 
     const token = localStorage.getItem('token');
     if (!token) {
@@ -17,7 +17,7 @@ export const useAuthInit = () => {
       return;
     }
 
-    console.log('📦 Токен найден:', token);
+    // console.log('📦 Токен найден:', token);
 
     getCurrentUser()
       .then(({ data }) => {
