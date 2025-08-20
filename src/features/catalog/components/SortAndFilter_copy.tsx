@@ -35,6 +35,8 @@ export const SortAndFilter: FC<Props> = ({
   const handleReset = () => {
     onFilterChange({}); // сброс фильтров
     onSortChange(undefined); // сброс сортировки
+
+    // закрыть все раскрытые фильтры
     Object.keys(expanded).forEach(key => {
       if (expanded[key]) {
         onToggleExpand(key);
@@ -48,7 +50,7 @@ export const SortAndFilter: FC<Props> = ({
       <FilterPanel
         filters={filters}
         selectedFilters={selectedFilters}
-        onFilterChange={handleFilterChange}
+        onFilterChange={handleFilterChange} // <-- используем обёртку
         onReset={handleReset}
         expanded={expanded}
         onToggleExpand={onToggleExpand}
@@ -56,6 +58,3 @@ export const SortAndFilter: FC<Props> = ({
     </div>
   );
 };
-
-// 👉 Экспортируем отдельно SortControl, чтобы использовать его в Catalog
-export { SortControl };

@@ -1,18 +1,20 @@
-﻿import MasterCardIcon from '../../assets/icons/Payments/master_card.svg?react';
+﻿import styles from './Footer.module.scss';
+
+import MasterCardIcon from '../../assets/icons/Payments/master_card.svg?react';
 import VisaIcon from '../../assets/icons/Payments/visa.svg?react';
 import MirIcon from '../../assets/icons/Payments/mir.svg?react';
 
 function Payments() {
   return (
-    <ul className="flex items-center gap-4 list-none">
+    <ul className={styles.payments}>
       <li>
-        <MasterCardIcon className="h-6 w-auto" />
+        <MasterCardIcon />
       </li>
       <li>
-        <VisaIcon className="h-6 w-auto" />
+        <VisaIcon />
       </li>
       <li>
-        <MirIcon className="h-6 w-auto" />
+        <MirIcon />
       </li>
     </ul>
   );

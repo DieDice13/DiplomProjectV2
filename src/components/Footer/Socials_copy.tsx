@@ -1,29 +1,33 @@
-﻿import TelegramIcon from '../../assets/icons/Socials/icon_telegram.svg?react';
+﻿import styles from './Footer.module.scss';
+import TelegramIcon from '../../assets/icons/Socials/icon_telegram.svg?react';
+
 import OdnoklassnikiIcon from '../../assets/icons/Socials/icon_odnoklassniki.svg?react';
+
 import YoutubeIcon from '../../assets/icons/Socials/icon_youtube.svg?react';
+
 import VkIcon from '../../assets/icons/Socials/icon_vk.svg?react';
 
 function Socials() {
   return (
-    <div className="mt-8">
-      <h6 className="font-bold text-sm mb-2">Оставайтесь на связи</h6>
-      <ul className="flex gap-3 list-none">
-        <li className="hover:[&>a>svg]:fill-[var(--site-selector-hover)]">
+    <div className={styles.socials}>
+      <h6>Оставайтесь на связи</h6>
+      <ul className={styles.socialList}>
+        <li>
           <a href="#">
             <TelegramIcon width={25} height={25} />
           </a>
         </li>
-        <li className="hover:[&>a>svg]:fill-[var(--site-selector-hover)]">
+        <li>
           <a href="#">
             <OdnoklassnikiIcon width={25} height={25} />
           </a>
         </li>
-        <li className="hover:[&>a>svg]:fill-[var(--site-selector-hover)]">
+        <li>
           <a href="#">
             <YoutubeIcon width={25} height={25} />
           </a>
         </li>
-        <li className="hover:[&>a>svg]:fill-[var(--site-selector-hover)]">
+        <li>
           <a href="#">
             <VkIcon width={25} height={25} />
           </a>

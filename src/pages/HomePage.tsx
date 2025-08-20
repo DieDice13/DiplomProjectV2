@@ -14,8 +14,8 @@ const Home = () => {
         <ShowCase />
         <ProductSliderContainer category="smartphones" />
         <PromoSlider />
-        <ProductSliderContainer category="smartphones" />
-        <ProductSliderContainer category="smartphones" />
+        <ProductSliderContainer category="gaming_devices" />
+        <ProductSliderContainer category="laptops" />
         <PromoSlider />
         <PopularBrands />
       </Container>

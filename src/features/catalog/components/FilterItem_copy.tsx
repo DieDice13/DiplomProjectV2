@@ -1,4 +1,8 @@
-﻿export type FilterValue = {
+﻿import React from 'react';
+
+import styles from './FilterItem.module.scss';
+
+export type FilterValue = {
   value: string;
   count: number;
 };
@@ -6,7 +10,7 @@
 type Props = {
   parameter: string;
   label: string;
-  values: FilterValue[];
+  values: FilterValue[]; // изменено
   expanded: boolean;
   toggleExpand: () => void;
   selectedFilters: Set<string>;
@@ -22,36 +26,27 @@ const FilterItem: React.FC<Props> = ({
   onChange,
 }) => {
   return (
-    <div className="border-b border-gray-300">
-      {/* Заголовок фильтра */}
-      <div
-        className="cursor-pointer px-3 py-4 font-bold text-gray-700 hover:text-gray-900 transition-colors"
-        onClick={toggleExpand}
-      >
+    <div className={styles['filter-item']}>
+      <div className={styles['filter-header']} onClick={toggleExpand}>
         {label}
       </div>
-
-      {/* Опции фильтра */}
       {expanded && (
-        <div className="flex flex-col gap-2 px-3 pb-3">
+        <div className={styles['filter-options']}>
           {values.length > 0 ? (
             values.map(({ value, count }) => (
-              <label
-                key={value}
-                className="flex items-center text-gray-700 hover:text-gray-900 cursor-pointer"
-              >
+              <label key={value} className={styles['filter-label']}>
                 <input
                   type="checkbox"
                   checked={selectedFilters.has(value)}
                   onChange={e => onChange(value, e.target.checked)}
-                  className="h-4 w-4 mr-2 accent-blue-600"
+                  className={styles['filter-checkbox']}
                 />
-                <span>{value}</span>
-                <span className="ml-1 text-gray-500 text-sm">({count})</span>
+                {value}
+                <span className={styles['filter-count']}>({count})</span>
               </label>
             ))
           ) : (
-            <div className="text-gray-500 text-sm">Нет значений</div>
+            <div>Нет значений</div>
           )}
         </div>
       )}

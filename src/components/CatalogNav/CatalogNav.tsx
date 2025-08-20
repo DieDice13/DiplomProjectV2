@@ -1,23 +1,34 @@
 ﻿import { Link } from 'react-router-dom';
-import styles from './CatalogNav.module.scss';
 
 const categories = [
   { path: '/products/smartphones', label: 'Смартфоны' },
   { path: '/products/laptops', label: 'Ноутбуки' },
   { path: '/products/microwaves', label: 'Микроволновки' },
-  { path: '/products/tablets', label: 'Планшеты' },
-  { path: '/products/fridges', label: 'Холодильники' },
-  { path: '/products/tvs', label: 'Телевизоры' },
-  { path: '/products/headphones', label: 'Наушники' },
-  // добавь сколько угодно
+  { path: '/products/gaming_devices', label: 'Игровые устройства' },
+  { path: '/products/televisions', label: 'Телевизоры' },
+  { path: '/products/video_equipments', label: 'Видеооборудование' },
+  { path: '/products/kitchen_appliances', label: 'Кухонная техника' },
 ];
 
 const CatalogNav = () => {
   return (
-    <div className={styles.catalog_nav}>
-      <div className={styles.catalog_track}>
+    <div className="relative z-10 bg-white">
+      {/* линия сверху на всю ширину экрана */}
+      <div className="absolute top-0 left-1/2 w-screen -translate-x-1/2 h-px bg-neutral-200 pointer-events-none" />
+
+      {/* тень снизу на всю ширину экрана */}
+      <div className="absolute bottom-0 left-1/2 w-screen -translate-x-1/2 h-2 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.15)] pointer-events-none -z-10" />
+
+      <div
+        className="flex justify-between gap-4 overflow-x-auto overflow-y-hidden py-2 pb-3 
+        [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {categories.map(({ path, label }) => (
-          <Link key={path} to={path} className={styles.catalog_link}>
+          <Link
+            key={path}
+            to={path}
+            className="flex-shrink-0 whitespace-nowrap px-3 py-0.5 text-[color:var(--text-color)] hover:text-[color:var(--site-selector)] transition-colors"
+          >
             {label}
           </Link>
         ))}

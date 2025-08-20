@@ -1,6 +1,8 @@
 ﻿import type { SortOption } from './types';
 import { mapSortValueToEnum } from './sortUtils';
 
+import styles from './SortControl.module.scss';
+
 type Props = {
   selectedSort?: SortOption;
   onChange: (value: SortOption | undefined) => void;
@@ -9,17 +11,19 @@ type Props = {
 const SortControl = ({ selectedSort, onChange }: Props) => {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === 'default') {
-      onChange(undefined);
+      onChange(undefined); // сброс сортировки
       return;
     }
     const mapped = mapSortValueToEnum(e.target.value);
-    if (mapped) onChange(mapped);
+    if (mapped) {
+      onChange(mapped);
+    }
   };
 
   return (
-    <div className="w-full mb-4">
+    <div className={styles.catalog__sorting}>
       <select
-        className="w-full border border-gray-300 rounded p-2 text-sm"
+        className={styles['catalog__sorting-select']}
         value={selectedSort?.toLowerCase().replace('_', '-') ?? 'default'}
         onChange={handleChange}
       >

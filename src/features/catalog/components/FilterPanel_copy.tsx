@@ -3,9 +3,11 @@ import FilterItem from './FilterItem';
 import type { AttributeWithValues, NormalizedFilters, SelectedFilters } from './types';
 import type { FilterValue } from './FilterItem';
 
+import styles from './FilterPanel.module.scss';
+
 type Props = {
   filters: AttributeWithValues[];
-  selectedFilters: SelectedFilters;
+  selectedFilters: SelectedFilters; // <-- используем как источник правды
   onFilterChange: (filters: NormalizedFilters) => void;
   onReset?: () => void;
   expanded: Record<string, boolean>;
@@ -30,12 +32,13 @@ const FilterPanel: React.FC<Props> = ({
       newSet.delete(value);
     }
 
+    // Создаём новую копию, чтобы гарантировать реактивность
     const updated: SelectedFilters = { ...selectedFilters };
 
     if (newSet.size > 0) {
       updated[param] = newSet;
     } else {
-      delete updated[param];
+      delete updated[param]; // <-- 🔥 удаляем ключ, если фильтров нет
     }
 
     const transformed: NormalizedFilters = Object.fromEntries(
@@ -46,7 +49,7 @@ const FilterPanel: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={styles.filters}>
       {filters.map(({ key, label, values }) => (
         <FilterItem
           key={key}
@@ -59,11 +62,7 @@ const FilterPanel: React.FC<Props> = ({
           onChange={(value, checked) => updateFilter(key, value, checked)}
         />
       ))}
-
-      <button
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-        onClick={onReset}
-      >
+      <button className={styles.btn_reset_filters} onClick={onReset}>
         Сбросить
       </button>
     </div>

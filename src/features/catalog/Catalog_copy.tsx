@@ -2,9 +2,11 @@
 import { useParams } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import ProductCard from '../../components/ProductCard/ProductCard';
-import { SortAndFilter, SortControl } from './components/SortAndFilter';
+import { SortAndFilter } from './components/SortAndFilter';
 import { useProductsByCategory } from '../../api/products';
 import { useAttributesByCategory } from '../../api/filters';
+
+import styles from './Catalog.module.scss';
 
 import type { SortOption, SelectedFilters } from './components/types';
 import type { Product } from '../../types/product';
@@ -17,7 +19,6 @@ const Catalog = () => {
   const [sort, setSort] = useState<SortOption | undefined>(undefined);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(0);
-  const [filtersOpen, setFiltersOpen] = useState(false); // off-canvas для мобилок
 
   const mapToDbCategory = (paramCategory: string) => {
     const map: Record<string, string> = {
@@ -91,12 +92,9 @@ const Catalog = () => {
 
   if (errorProducts || errorFilters) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className={styles.catalog}>
         <p>Не удалось загрузить продукты. Попробуйте позже.</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
-        >
+        <button onClick={() => window.location.reload()} className={styles.retryButton}>
           Попробовать снова
         </button>
       </div>
@@ -104,7 +102,7 @@ const Catalog = () => {
   }
 
   if (products.length === 0) {
-    return <div className="flex flex-col gap-6">По заданным параметрам ничего не найдено.</div>;
+    return <div className={styles.catalog}>По заданным параметрам ничего не найдено.</div>;
   }
 
   const sortProducts = (products: Product[], sort?: SortOption) => {
@@ -128,30 +126,12 @@ const Catalog = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="mt-4 text-2xl font-semibold">{transformCategoryName(category!)}</h1>
+    <div className={styles.catalog}>
+      <h1>{transformCategoryName(category!)}</h1>
 
-      {/* Сортировка + кнопка фильтров (мобилка) */}
-      <div className="flex lg:hidden gap-4">
-        <div className="flex-1">
-          <SortControl selectedSort={sort} onChange={handleSortChange} />
-        </div>
-
-        <div className="w-28">
-          <button
-            onClick={() => setFiltersOpen(true)}
-            className="w-full flex items-center justify-center gap-2 rounded border px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-          >
-            Фильтры
-          </button>
-        </div>
-      </div>
-
-      {/* Обёртка контента и фильтров */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Контент */}
-        <main className="flex-[3] flex flex-col w-full">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className={styles.catalog__layout}>
+        <main className={styles.catalog__content}>
+          <div className={styles.catalog__productGrid}>
             {sortProducts(products, sort).map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -166,18 +146,15 @@ const Catalog = () => {
             pageRangeDisplayed={3}
             onPageChange={({ selected }) => setCurrentPage(selected)}
             forcePage={currentPage}
-            containerClassName="flex flex-wrap justify-center gap-2 mt-8 mb-5 list-none p-0"
-            pageClassName="min-w-[40px] h-10 border border-gray-300 rounded-md flex items-center justify-center transition-colors cursor-pointer text-gray-700 hover:bg-blue-600 hover:text-white"
-            pageLinkClassName="w-full h-full flex items-center justify-center"
-            activeClassName="!bg-blue-600 !text-white font-bold"
-            previousClassName="min-w-[40px] h-10 border border-gray-300 rounded-md flex items-center justify-center text-gray-700 cursor-pointer hover:bg-blue-600 hover:text-white"
-            nextClassName="min-w-[40px] h-10 border border-gray-300 rounded-md flex items-center justify-center text-gray-700 cursor-pointer hover:bg-blue-600 hover:text-white"
-            disabledClassName="pointer-events-none opacity-50"
+            containerClassName={styles.catalog__pagination}
+            activeClassName={styles.catalog__paginationActive}
+            previousClassName={styles.catalog__paginationBtn}
+            nextClassName={styles.catalog__paginationBtn}
+            disabledClassName={styles.catalog__paginationDisabled}
           />
         </main>
 
-        {/* Сайдбар (desktop) */}
-        <aside className="hidden lg:block flex-1 max-w-[300px] w-full">
+        <aside className={styles.catalog__sidebar}>
           <SortAndFilter
             filters={availableFilters}
             selectedFilters={selectedFilters}
@@ -189,29 +166,6 @@ const Catalog = () => {
           />
         </aside>
       </div>
-
-      {/* Off-canvas фильтры (mobile) */}
-      {filtersOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          {/* Тень */}
-          <div className="flex-1 bg-black/40" onClick={() => setFiltersOpen(false)} />
-          {/* Панель */}
-          <div className="w-4/5 max-w-xs bg-white h-full p-4 overflow-y-auto shadow-lg">
-            <button className="mb-4 text-sm text-gray-600" onClick={() => setFiltersOpen(false)}>
-              ✕ Закрыть
-            </button>
-            <SortAndFilter
-              filters={availableFilters}
-              selectedFilters={selectedFilters}
-              onFilterChange={handleFilterChange}
-              selectedSort={sort}
-              onSortChange={handleSortChange}
-              expanded={expanded}
-              onToggleExpand={handleToggleExpand}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
