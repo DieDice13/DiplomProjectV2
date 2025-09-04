@@ -16,7 +16,7 @@ const PromoSlider = () => {
     <div className="promotions-wrapper">
       <h3 className="mb-2 text-lg font-semibold">Акции</h3>
 
-      {/* Грид (desktop) */}
+      {/* Сетка (desktop) */}
       <div className="hidden md:grid grid-cols-3 gap-5">
         {promotions.map(promo => (
           <div key={promo.id} className="overflow-hidden rounded-lg">

@@ -4,8 +4,10 @@ import RegisterForm from './RegisterForm';
 
 const AuthWrapper = () => {
   const [isLogin, setIsLogin] = useState(true);
+
   const toggleForm = () => setIsLogin(prev => !prev);
 
+  // универсальный класс для input'ов: если есть ошибка — красная рамка, иначе серая
   const inputClass = (hasError: boolean) =>
     `px-3 py-2 border rounded-md outline-none transition ${
       hasError ? 'border-red-500' : 'border-gray-300'

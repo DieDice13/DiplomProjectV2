@@ -4,10 +4,11 @@ import * as yup from 'yup';
 import { useMutation } from '@apollo/client';
 import { REGISTER_USER } from '../../graphql/mutations/auth';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { setUser } from '../../features/auth/authSlice';
+import { setUser } from './authSlice';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../hooks/useFavorites';
+import FormField from '../forms/FormField';
 
 type RegisterFormData = {
   email: string;
@@ -16,10 +17,11 @@ type RegisterFormData = {
 };
 
 type RegisterFormProps = {
-  onRegisterSuccess: () => void;
-  inputClass: (hasError: boolean) => string;
+  onRegisterSuccess: () => void; // коллбэк для переключения на форму логина
+  inputClass: (hasError: boolean) => string; // функция для генерации классов input
 };
 
+// схема валидации через Yup
 const schema = yup.object().shape({
   name: yup.string().required('Имя обязательно'),
   email: yup.string().email('Некорректная почта').required('Обязательное поле'),
@@ -32,10 +34,11 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
   const navigate = useNavigate();
   const { syncFavorites } = useFavorites();
 
+  // инициализация react-hook-form с yup-валидатором
   const {
     register,
     handleSubmit,
-    setError, // ← добавлено
+    setError,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: yupResolver(schema),
@@ -49,13 +52,14 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
       localStorage.setItem('token', token);
       dispatch(setUser(user));
 
-      await syncFavorites(); // ← СИНХРОНИЗАЦИЯ ИЗБРАННЫХ
+      await syncFavorites();
 
       toast.success('Регистрация прошла успешно');
-      navigate('/profile'); // ← редирект
+      navigate('/profile');
 
-      onRegisterSuccess(); // ← переключение формы, если нужно
+      onRegisterSuccess();
     } catch (err: any) {
+      // обработка ошибок (например, занятый email)
       const message = err?.graphQLErrors?.[0]?.message || 'Ошибка регистрации';
 
       if (message.toLowerCase().includes('email')) {
@@ -73,56 +77,48 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <h2 className="text-xl font-semibold text-center">Регистрация</h2>
 
-      <div className="flex flex-col">
-        <label>
-          Имя<span className="text-red-500">*</span>
-        </label>
+      {/* Имя */}
+      <FormField label="Имя" required error={errors.name?.message}>
         <input
           type="text"
           placeholder="Имя"
           {...register('name')}
           className={inputClass(!!errors.name)}
         />
-        {errors.name && <p className="error-text">{errors.name.message}</p>}
-      </div>
+      </FormField>
 
-      <div className="flex flex-col">
-        <label>
-          Email<span className="text-red-500">*</span>
-        </label>
+      {/* Email */}
+      <FormField label="Email" required error={errors.email?.message}>
         <input
           type="email"
           placeholder="example@mail.com"
           {...register('email')}
           className={inputClass(!!errors.email)}
         />
-        {errors.email && <p className="error-text">{errors.email.message}</p>}
-      </div>
+      </FormField>
 
-      <div className="flex flex-col">
-        <label>
-          Пароль<span className="text-red-500">*</span>
-        </label>
+      {/* Пароль */}
+      <FormField label="Пароль" required error={errors.password?.message}>
         <input
           type="password"
           placeholder="Введите пароль"
           {...register('password')}
           className={inputClass(!!errors.password)}
         />
-        {errors.password && <p className="error-text">{errors.password.message}</p>}
-      </div>
+      </FormField>
 
+      {/* глобальная ошибка (например, email уже занят) */}
       {errors.root && <p className="text-red-500 text-center text-sm">{errors.root.message}</p>}
 
       <div className="flex items-center justify-between gap-4 mt-4">
         <button
           type="submit"
           disabled={loading}
-          className="bg-[var(--site-selector-color)]
-    hover:bg-[var(--site-selector-hover)] text-white p-2"
+          className="bg-[var(--site-selector)] hover:bg-[var(--site-selector-hover)] text-white p-2"
         >
           {loading ? 'Регистрация...' : 'Зарегистрироваться'}
         </button>
+
         <button
           type="button"
           onClick={onRegisterSuccess}

@@ -24,9 +24,6 @@ export const saveCartState = (state: CartState): void => {
   }
 };
 
-// ⬇️ новые функции для избранного
-
-// utils/localStorage.ts
 export const loadFavoritesState = () => {
   try {
     const serializedState = localStorage.getItem('favorites');

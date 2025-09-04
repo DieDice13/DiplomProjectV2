@@ -12,10 +12,10 @@ const Home = () => {
       <Header />
       <Container>
         <ShowCase />
-        <ProductSliderContainer category="smartphones" />
+        <ProductSliderContainer category="smartphones" title="Смартфоны" />
         <PromoSlider />
-        <ProductSliderContainer category="gaming_devices" />
-        <ProductSliderContainer category="laptops" />
+        <ProductSliderContainer category="gaming_devices" title="Игровые девайсы" />
+        <ProductSliderContainer category="laptops" title="Ноутбуки" />
         <PromoSlider />
         <PopularBrands />
       </Container>

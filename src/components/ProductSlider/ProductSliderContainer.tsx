@@ -1,13 +1,15 @@
-﻿import { useQuery } from '@apollo/client';
+﻿// ProductSliderContainer.tsx
+import { useQuery } from '@apollo/client';
 import ProductSlider from './ProductSlider';
 import type { Product } from '../../types/product';
 import { GET_PRODUCTS_FOR_SLIDER } from '../../graphql/queries/productsForSlider';
 
 interface Props {
   category: string;
+  title: string;
 }
 
-const ProductSliderContainer: React.FC<Props> = ({ category }) => {
+const ProductSliderContainer: React.FC<Props> = ({ category, title }) => {
   const { data, loading, error } = useQuery(GET_PRODUCTS_FOR_SLIDER, {
     variables: { category },
   });
@@ -19,10 +21,9 @@ const ProductSliderContainer: React.FC<Props> = ({ category }) => {
   }
 
   const products: Product[] = data?.products?.items || [];
-
   if (products.length === 0) return <p>Нет товаров в категории</p>;
 
-  return <ProductSlider products={products} />;
+  return <ProductSlider products={products} title={title} />;
 };
 
 export default ProductSliderContainer;

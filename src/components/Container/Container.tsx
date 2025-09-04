@@ -1,12 +1,11 @@
 ﻿import React from 'react';
-import styles from './Container.module.scss';
 
 interface ContainerProps {
   children: React.ReactNode;
 }
 
 const Container: React.FC<ContainerProps> = ({ children }) => (
-  <div className={styles.container}>{children}</div>
+  <div className="mx-auto w-full max-w-[1440px] px-[15px] sm:px-[40px]">{children}</div>
 );
 
 export default Container;

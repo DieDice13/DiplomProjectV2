@@ -1,23 +1,22 @@
 ﻿import { useAppSelector } from '../../hooks/useAppSelector';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { logout } from '../../features/auth/authSlice';
+import { logout } from '../Auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const user = useAppSelector(state => state.auth.user);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  //   console.log(user);
 
   if (!user) return null;
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/auth'); // или куда-то на главную — зависит от UX
+    navigate('/auth');
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 my-6">
       <h2 className="text-2xl font-semibold">Профиль пользователя</h2>
       <div>
         <p>
@@ -26,7 +25,7 @@ const Profile = () => {
         <p>
           <strong>Email:</strong> {user.email}
         </p>
-        {/* Добавим позже: смена пароля, история заказов, выход */}
+        {/* Функционал который добавлю позже: смена пароля, история заказов*/}
       </div>
       <button
         onClick={handleLogout}

@@ -2,7 +2,7 @@
 import { useAppDispatch } from './useAppDispatch';
 import { useLazyQuery } from '@apollo/client';
 import { GET_CURRENT_USER } from '../graphql/queries/getCurrentUser';
-import { setUser } from '../features/auth/authSlice';
+import { setUser } from '../components/Auth/authSlice';
 
 export const useAuthInit = () => {
   const dispatch = useAppDispatch();

@@ -57,7 +57,6 @@ export function useCart(loadOnMount = true) {
           discount: ci.product.discount ?? undefined,
           image: ci.product.image ?? '',
           category: ci.product.category,
-          // Добавь остальные поля Product, если есть
         } as Product,
       }));
       dispatch(setCartItems(mapped));

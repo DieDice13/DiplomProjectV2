@@ -1,32 +1,29 @@
 ﻿import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
-import styles from './ProductDetail.module.scss';
 import { GET_PRODUCT_BY_ID } from '../../graphql/queries/product';
 import { GET_ATTRIBUTES_BY_CATEGORY } from '../../graphql/queries/filters';
 import Reviews from '../../features/reviews/Reviews';
 import { GET_REVIEWS_BY_PRODUCT } from '../../graphql/queries/reviews';
 import { useFavorites } from '../../hooks/useFavorites';
 import type { ProductDetailType } from '../../types/ProductDetail';
+import { Heart, ShoppingCart } from 'lucide-react';
+import { useCart } from '../../hooks/useCart';
 
-type Attribute = {
-  key: string;
-  label: string;
-};
-
-type Review = {
-  id: string;
-  rating: number;
-  comment?: string;
-};
+// Типы для характеристик и отзывов
+type Attribute = { key: string; label: string };
+type Review = { id: string; rating: number; comment?: string };
 
 export default function ProductDetail() {
   const { id, category } = useParams<{ id: string; category: string }>();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const { favorites, toggleFavorite } = useFavorites(); // перенесли наверх
+  const [isExpanded, setIsExpanded] = useState(false); // Раскрытие полного описания
+  const { favorites, toggleFavorite } = useFavorites();
+  const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
 
+  // Преобразуем id в число
   const productIdInt = id && /^\d+$/.test(id) ? parseInt(id, 10) : undefined;
 
+  // --- Запрос данных товара ---
   const {
     data: productData,
     loading: loadingProduct,
@@ -36,6 +33,7 @@ export default function ProductDetail() {
     skip: !productIdInt,
   });
 
+  // --- Запрос характеристик для категории ---
   const {
     data: attributesData,
     loading: loadingAttributes,
@@ -45,8 +43,9 @@ export default function ProductDetail() {
     skip: !category,
   });
 
+  // --- Запрос отзывов ---
   const {
-    data: reviewsData,
+    // data: reviewsData,
     loading: loadingReviews,
     error: errorReviews,
   } = useQuery<{ reviewsByProduct: Review[] }>(GET_REVIEWS_BY_PRODUCT, {
@@ -54,170 +53,173 @@ export default function ProductDetail() {
     skip: !productIdInt,
   });
 
-  // ранний выход после хуков
-  if (loadingProduct || loadingAttributes || loadingReviews) {
-    return <div>Загрузка...</div>;
-  }
-
-  if (errorProduct || errorAttributes || errorReviews) {
-    return <div>Ошибка при загрузке данных</div>;
-  }
+  // --- Лоадеры и обработка ошибок ---
+  if (loadingProduct || loadingAttributes || loadingReviews) return <div>Загрузка...</div>;
+  if (errorProduct || errorAttributes || errorReviews) return <div>Ошибка при загрузке данных</div>;
 
   const product = productData?.product;
   const attributes = attributesData?.attributes ?? [];
-  const reviews = reviewsData?.reviewsByProduct ?? [];
+  // const reviews = reviewsData?.reviewsByProduct ?? [];
 
-  if (!product) {
-    return <div>Товар не найден</div>;
-  }
+  if (!product) return <div>Товар не найден</div>;
 
+  // --- Расчет цены и скидки ---
   const discount = product.discount ?? 0;
   const finalPrice = product.price * (1 - discount / 100);
 
-  const calculateAverageRating = () => {
-    if (reviews.length === 0) return 0;
-    const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0);
-    return sum / reviews.length;
-  };
-
+  // --- Избранное ---
   const isFavorite = favorites.some(f => f.id === Number(product.id));
+  const handleFavoriteClick = () => toggleFavorite(product, isFavorite);
 
-  const handleFavoriteClick = () => {
-    toggleFavorite(product, isFavorite);
+  // --- Корзина ---
+  const cartItem = cartItems.find(i => i.id === String(product.id));
+  const quantity = cartItem?.quantity ?? 0;
+
+  const handleAdd = () => {
+    if (!cartItem) addToCart(product, 1);
+    else updateQuantity(cartItem.id, cartItem.quantity + 1);
   };
 
+  const handleRemove = () => {
+    if (!cartItem) return;
+    if (cartItem.quantity > 1) updateQuantity(cartItem.id, cartItem.quantity - 1);
+    else removeFromCart(cartItem.id);
+  };
+
+  // --- Функция рендеринга характеристик ---
   const renderFeatures = () =>
     attributes.map(attr => {
       const value = product.features?.[attr.key];
       return value ? (
-        <li key={attr.key}>
-          <strong>{attr.label}:</strong> {value}
+        <li key={attr.key} className="text-gray-700">
+          <span className="font-semibold text-gray-500">{attr.label}:</span> {value}
         </li>
       ) : null;
     });
 
-  const Star = ({ fillPercentage, size = 24 }: { fillPercentage: number; size?: number }) => {
-    const clipId = `clip-${Math.random()}`;
+  // --- Кнопка добавления в корзину ---
+  const CartButton = () => {
     return (
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ marginRight: 4 }}
-        aria-hidden="true"
-      >
-        <defs>
-          <clipPath id={clipId}>
-            <rect x="0" y="0" width={`${fillPercentage}%`} height="24" />
-          </clipPath>
-        </defs>
-        <path
-          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-          fill="#ccc"
-        />
-        <path
-          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-          fill="#FFC107"
-          clipPath={`url(#${clipId})`}
-        />
-      </svg>
-    );
-  };
+      <div className="flex flex-col gap-2 w-full">
+        <div className="w-full rounded-md overflow-hidden bg-[var(--site-selector)] text-white font-medium">
+          {quantity === 0 ? (
+            <button
+              onClick={handleAdd}
+              className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3.5 text-base transition-colors"
+            >
+              В корзину <ShoppingCart size={20} />
+            </button>
+          ) : (
+            <div className="flex items-center justify-between w-full">
+              <button
+                onClick={handleRemove}
+                className="px-4 py-2.5 sm:py-3.5 text-lg font-bold hover:bg-[var(--site-selector-hover)]"
+              >
+                −
+              </button>
+              <span className="flex-1 text-center text-sm sm:text-base">
+                В корзине: <strong>{quantity}</strong> шт
+              </span>
+              <button
+                onClick={handleAdd}
+                className="px-4 py-2.5 sm:py-3.5 text-lg font-bold hover:bg-[var(--site-selector-hover)]"
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
 
-  const StarRating = ({ rating }: { rating: number }) => {
-    const stars = [];
-    for (let i = 0; i < 5; i++) {
-      let fillPercentage = 0;
-      if (rating >= i + 1) fillPercentage = 100;
-      else if (rating > i) fillPercentage = (rating - i) * 100;
-      stars.push(<Star key={i} fillPercentage={fillPercentage} size={20} />);
-    }
-    return (
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {stars}
-        <span style={{ marginLeft: 8, fontSize: 14, color: '#555' }}>({reviews.length})</span>
+        {quantity > 0 && (
+          <Link to="/cart" className="text-center text-sm text-blue-600 hover:underline">
+            Перейти в корзину
+          </Link>
+        )}
       </div>
     );
   };
 
   return (
-    <div className={styles['product-detail']}>
-      <h1 className={styles['product-detail__title']}>{product.name}</h1>
-
-      <div className={styles['product-detail__area-user-controls']}>
-        <StarRating rating={calculateAverageRating()} />
-        <button className={styles['product-detail__favorite-button']} onClick={handleFavoriteClick}>
-          <svg
-            className={`${styles['product-detail__favorite-icon']} ${
-              isFavorite ? styles['product-detail__favorite-icon--active'] : ''
-            }`}
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill={isFavorite ? '#FF0000' : '#5f6368'}
+    <div className="p-4 sm:p-6 bg-white flex flex-col gap-6">
+      {/* Название товара и управление избранным */}
+      <div className="flex flex-col gap-4">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">{product.name}</h1>
+        <div className="flex items-center justify-start gap-3 border-b border-gray-300 pb-2">
+          <button
+            onClick={handleFavoriteClick}
+            className="flex items-center gap-1 text-sm sm:text-base cursor-pointer select-none"
           >
-            <path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z" />
-          </svg>
-          {isFavorite ? 'В избранном' : 'В избранное'}
-        </button>
+            <Heart
+              size={20}
+              className={`transition-transform duration-200 ${
+                isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+              }`}
+            />
+            <span>{isFavorite ? 'В избранном' : 'В избранное'}</span>
+          </button>
+        </div>
       </div>
 
-      <div className={styles['product-detail__content']}>
-        <div className={styles['product-detail__img-area']}>
-          <img src={product.image ?? ''} alt={product.name} />
+      {/* Основной блок: фото + характеристики + цена */}
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:gap-6">
+        {/* Фото товара */}
+        <div className="flex justify-center items-center min-w-0 shrink">
+          <div className="h-[260px] sm:h-[500px] lg:h-[520px] w-full flex justify-center items-center">
+            <img src={product.image ?? ''} alt={product.name} className="h-full object-contain" />
+          </div>
         </div>
 
-        <section className={styles['product-detail__features']}>
-          <h2 className={styles['product-detail__features-title']}>Характеристики</h2>
-          <ul className={styles['product-detail__features-list']}>{renderFeatures()}</ul>
+        {/* Характеристики и описание */}
+        <div className="flex flex-col gap-6 mt-4 lg:mt-0 px-0 lg:px-4 min-w-0 shrink">
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg sm:text-xl font-semibold">Характеристики</h2>
+            <ul className="flex flex-col gap-2 list-none p-0 m-0">{renderFeatures()}</ul>
+          </section>
 
-          <section className={styles['product-detail__description']}>
-            <h2 className={styles['product-detail__description-title']}>Описание</h2>
-            <p
-              className={`${styles['product-detail__description-text']} ${
-                isExpanded ? styles['product-detail__description-text--expanded'] : ''
-              }`}
-            >
+          <section className="flex flex-col gap-2">
+            <h2 className="text-lg sm:text-xl font-semibold">Описание</h2>
+            <p className={`text-gray-700 text-sm sm:text-base ${isExpanded ? '' : 'line-clamp-3'}`}>
               {product.description}
             </p>
             <button
-              className={styles['product-detail__description-toggle']}
               onClick={() => setIsExpanded(!isExpanded)}
-              aria-expanded={isExpanded}
+              className="text-[var(--site-selector)] font-medium hover:underline self-start text-sm sm:text-base"
             >
               {isExpanded ? 'Скрыть' : 'Показать полностью'}
             </button>
           </section>
-        </section>
+        </div>
 
-        <div className={styles['product-detail__price-block']}>
-          <div className={styles['product-detail__price']}>
+        {/* Цена и кнопка корзины */}
+        <div className="border border-gray-300 p-5 flex flex-col gap-5 mt-4 lg:mt-0 w-full lg:w-auto lg:min-w-[220px] lg:max-w-[300px] self-start">
+          <div className="flex flex-col gap-3">
             {discount > 0 ? (
               <>
-                <span className={styles['product-detail__price-old']}>
-                  {product.price.toFixed(2)} ₸
+                <span className="line-through text-gray-500 text-base sm:text-lg">
+                  {product.price.toLocaleString('ru-RU')} ₸
                 </span>
-                <div className={styles['product-detail__price-current']}>
-                  <span className={styles['product-detail__price-new']}>
-                    {finalPrice.toFixed(2)} ₸
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl sm:text-3xl font-bold text-[var(--site-selector)]">
+                    {finalPrice.toLocaleString('ru-RU')} ₸
                   </span>
-                  <span className={styles['product-detail__price-discount']}>-{discount}%</span>
+                  <span className="bg-red-500 text-white text-sm font-bold px-2.5 py-1.5 rounded">
+                    -{discount}%
+                  </span>
                 </div>
               </>
             ) : (
-              <span className={styles['product-detail__price-new']}>
-                {product.price.toFixed(2)} ₸
+              <span className="text-2xl sm:text-3xl font-bold text-[var(--site-selector)]">
+                {product.price.toLocaleString('ru-RU')} ₸
               </span>
             )}
           </div>
 
-          <button className={styles['product-detail__buy-button']}>В корзину</button>
+          {/* Кнопка добавления/редактирования корзины */}
+          <CartButton />
         </div>
       </div>
 
+      {/* Отзывы */}
       <Reviews productId={product.id} />
     </div>
   );

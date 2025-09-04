@@ -43,7 +43,7 @@ export const SortAndFilter: FC<Props> = ({
   };
 
   return (
-    <div className={styles.SortAndFilter}>
+    <div className={'w-full'}>
       <SortControl selectedSort={selectedSort} onChange={onSortChange} />
       <FilterPanel
         filters={filters}

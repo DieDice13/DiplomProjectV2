@@ -2,7 +2,7 @@
 import { setContext } from '@apollo/client/link/context';
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql', // URL твоего GraphQL-сервера
+  uri: 'http://localhost:4000/graphql', // URL нашего GraphQL-сервера
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -17,6 +17,6 @@ const authLink = setContext((_, { headers }) => {
 });
 
 export const apolloClient = new ApolloClient({
-  link: authLink.concat(httpLink), // ← важно: цепочка middleware + http
+  link: authLink.concat(httpLink), // цепочка middleware + http
   cache: new InMemoryCache(),
 });

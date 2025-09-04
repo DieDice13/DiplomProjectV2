@@ -1,9 +1,11 @@
-﻿import { useState } from 'react';
+﻿// AddReviewForm.tsx
+import { useState } from 'react';
 import type { FC } from 'react';
 import { useMutation } from '@apollo/client';
 import { ADD_REVIEW } from '../../graphql/mutations/reviews';
 import { GET_REVIEWS_BY_PRODUCT } from '../../graphql/queries/reviews';
 import { useAppSelector } from '../../hooks/useAppSelector';
+import RatingStars from './RatingStars';
 
 interface AddReviewFormProps {
   productId: number;
@@ -12,7 +14,7 @@ interface AddReviewFormProps {
 
 const AddReviewForm: FC<AddReviewFormProps> = ({ productId, onCancel }) => {
   const { user } = useAppSelector(state => state.auth);
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [hover, setHover] = useState<number | null>(null);
 
@@ -34,14 +36,11 @@ const AddReviewForm: FC<AddReviewFormProps> = ({ productId, onCancel }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim()) return;
-
+    if (!comment.trim() || rating === 0) return;
     try {
-      await addReview({
-        variables: { productId, rating, comment },
-      });
+      await addReview({ variables: { productId, rating, comment } });
       setComment('');
-      setRating(5);
+      setRating(0);
       if (onCancel) onCancel();
     } catch (err) {
       console.error('Ошибка при добавлении отзыва:', err);
@@ -49,55 +48,52 @@ const AddReviewForm: FC<AddReviewFormProps> = ({ productId, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-100 py-6 px-4 mt-4 max-w-xl mx-auto">
-      <div className="flex items-center mb-4">
-        {[1, 2, 3, 4, 5].map(star => (
-          <span
-            key={star}
-            className={`text-3xl cursor-pointer ${
-              (hover || rating) >= star ? 'text-yellow-400' : 'text-gray-300'
-            }`}
-            onClick={() => setRating(star)}
-            onMouseEnter={() => setHover(star)}
-            onMouseLeave={() => setHover(null)}
-          >
-            ★
-          </span>
-        ))}
+    <form
+      onSubmit={handleSubmit}
+      className="relative bg-gray-100 py-10 px-6 rounded-lg shadow-md w-full mx-auto max-w-[900px] sm:max-w-[95%] lg:max-w-[850px]"
+    >
+      {onCancel && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="absolute top-4 right-4 text-[var(--site-selector)] text-sm font-medium"
+        >
+          Отмена
+        </button>
+      )}
+
+      <div className="flex flex-col items-start mb-6">
+        <span className="text-sm text-gray-600 mb-2">Выберите рейтинг товара *</span>
+        <RatingStars
+          rating={rating}
+          interactive
+          hoverRating={hover}
+          onHover={setHover}
+          onClick={setRating}
+        />
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm mb-1">Отзыв *</label>
+      <div className="mb-6 w-full">
+        <label className="block text-sm mb-2">Отзыв *</label>
         <textarea
           value={comment}
           onChange={e => setComment(e.target.value)}
-          className="px-3 py-2 w-full bg-white outline-none"
+          className="px-4 py-3 w-full bg-white outline-none rounded-md resize-none text-sm"
           placeholder="Ваш отзыв"
-          rows={4}
+          rows={7}
           required
         />
       </div>
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 bg-green-500 text-white py-2 hover:bg-green-600 disabled:opacity-50"
-        >
-          {loading ? 'Отправка...' : 'Оставить отзыв'}
-        </button>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex-1 bg-gray-300 text-gray-800 py-2 hover:bg-gray-400"
-          >
-            Отмена
-          </button>
-        )}
-      </div>
+      <button
+        type="submit"
+        disabled={loading || rating === 0}
+        className="w-full bg-[var(--site-selector)] text-white py-3 rounded hover:bg-[var(--site-selector-hover)] disabled:opacity-50"
+      >
+        {loading ? 'Отправка...' : 'Оставить отзыв'}
+      </button>
 
-      <p className="text-xs text-gray-500 mt-2">Перед публикацией отзывы проходят модерацию</p>
+      <p className="text-xs text-gray-500 mt-3">Перед публикацией отзывы проходят модерацию</p>
     </form>
   );
 };
