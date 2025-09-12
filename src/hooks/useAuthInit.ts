@@ -9,27 +9,31 @@ export const useAuthInit = () => {
   const [getCurrentUser] = useLazyQuery(GET_CURRENT_USER);
 
   useEffect(() => {
-    // console.log('🔥 useAuthInit сработал');
-
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log('❌ Токен отсутствует в localStorage');
+      if (process.env.NODE_ENV !== 'test') {
+        console.log('❌ Токен отсутствует в localStorage');
+      }
       return;
     }
 
-    // console.log('📦 Токен найден:', token);
-
     getCurrentUser()
       .then(({ data }) => {
-        console.log('📨 Ответ от запроса me:', data);
+        if (process.env.NODE_ENV !== 'test') {
+          console.log('📨 Ответ от запроса me:', data);
+        }
         if (data?.me) {
           dispatch(setUser(data.me));
         } else {
-          console.warn('⚠️ me вернулся null');
+          if (process.env.NODE_ENV !== 'test') {
+            console.warn('⚠️ me вернулся null');
+          }
         }
       })
       .catch(err => {
-        console.error('🚨 Ошибка запроса me:', err);
+        if (process.env.NODE_ENV !== 'test') {
+          console.error('🚨 Ошибка запроса me:', err);
+        }
         localStorage.removeItem('token');
       });
   }, []);

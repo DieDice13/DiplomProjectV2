@@ -3,8 +3,6 @@ import type { SortOption, AttributeWithValues, SelectedFilters, NormalizedFilter
 import SortControl from './SortControl';
 import FilterPanel from './FilterPanel';
 
-import styles from './SortAndFilter.module.scss';
-
 type Props = {
   filters: AttributeWithValues[];
   selectedFilters: SelectedFilters;

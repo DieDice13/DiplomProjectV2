@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../hooks/useFavorites';
 import FormField from '../forms/FormField';
 
+// ---- Типы ----
 type RegisterFormData = {
   email: string;
   password: string;
@@ -17,24 +18,24 @@ type RegisterFormData = {
 };
 
 type RegisterFormProps = {
-  onRegisterSuccess: () => void; // коллбэк для переключения на форму логина
-  inputClass: (hasError: boolean) => string; // функция для генерации классов input
+  onRegisterSuccess: () => void;
+  inputClass: (hasError: boolean) => string;
 };
 
-// схема валидации через Yup
-const schema = yup.object().shape({
+// ---- Валидация ----
+const schema = yup.object({
   name: yup.string().required('Имя обязательно'),
   email: yup.string().email('Некорректная почта').required('Обязательное поле'),
   password: yup.string().min(6, 'Минимум 6 символов').required('Обязательное поле'),
 });
 
+// ---- Компонент ----
 const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
   const dispatch = useAppDispatch();
   const [registerUser, { loading }] = useMutation(REGISTER_USER);
   const navigate = useNavigate();
   const { syncFavorites } = useFavorites();
 
-  // инициализация react-hook-form с yup-валидатором
   const {
     register,
     handleSubmit,
@@ -42,12 +43,16 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: yupResolver(schema),
+    mode: 'onBlur', // ошибки показываются после ухода с поля
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const result = await registerUser({ variables: data });
-      const { token, user } = result.data.register;
+      const { data: result } = await registerUser({ variables: data });
+
+      if (!result?.register) throw new Error('Нет ответа от сервера');
+
+      const { token, user } = result.register;
 
       localStorage.setItem('token', token);
       dispatch(setUser(user));
@@ -59,7 +64,6 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
 
       onRegisterSuccess();
     } catch (err: any) {
-      // обработка ошибок (например, занятый email)
       const message = err?.graphQLErrors?.[0]?.message || 'Ошибка регистрации';
 
       if (message.toLowerCase().includes('email')) {
@@ -68,7 +72,7 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
         setError('root', { type: 'manual', message });
       }
 
-      toast.error('Ошибка регистрации');
+      toast.error(message);
       console.error('Ошибка при регистрации:', err);
     }
   };
@@ -107,14 +111,15 @@ const RegisterForm = ({ onRegisterSuccess, inputClass }: RegisterFormProps) => {
         />
       </FormField>
 
-      {/* глобальная ошибка (например, email уже занят) */}
+      {/* Глобальная ошибка */}
       {errors.root && <p className="text-red-500 text-center text-sm">{errors.root.message}</p>}
 
+      {/* Кнопки */}
       <div className="flex items-center justify-between gap-4 mt-4">
         <button
           type="submit"
           disabled={loading}
-          className="bg-[var(--site-selector)] hover:bg-[var(--site-selector-hover)] text-white p-2"
+          className="bg-[var(--site-selector)] hover:bg-[var(--site-selector-hover)] text-white p-2 rounded"
         >
           {loading ? 'Регистрация...' : 'Зарегистрироваться'}
         </button>

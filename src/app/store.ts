@@ -18,6 +18,10 @@ const preloadedState = {
     loadingRemove: false,
     error: null,
   },
+  auth: {
+    user: null,
+    isAuthInitialized: false,
+  },
 };
 
 export const store = configureStore({

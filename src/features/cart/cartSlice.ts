@@ -20,12 +20,18 @@ const cartSlice = createSlice({
     },
     addToCart(state, action: PayloadAction<CartItem>) {
       const existingItem = state.items.find(item => item.id === action.payload.id);
+
+      // нормализуем количество из payload
+      const payloadQuantity = action.payload.quantity > 0 ? action.payload.quantity : 0;
+
       if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
+        const newQuantity = existingItem.quantity + payloadQuantity;
+        existingItem.quantity = newQuantity > 0 ? newQuantity : existingItem.quantity; // не уменьшаем ниже 1
       } else {
-        state.items.push(action.payload);
+        state.items.push({ ...action.payload, quantity: payloadQuantity || 1 }); // если <=0, ставим 1
       }
     },
+
     removeFromCart(state, action: PayloadAction<string>) {
       state.items = state.items.filter(item => item.id !== action.payload);
     },

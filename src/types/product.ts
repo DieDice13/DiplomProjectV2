@@ -1,11 +1,14 @@
-﻿export type Product = {
+﻿export type Category = {
+  id: number;
+  name: string;
+};
+
+export type Product = {
   id: number;
   name: string;
   image: string;
   price: number;
   discount?: number;
-  category: {
-    name: string;
-  };
-  isFavorite?: boolean; // добавлено
+  category: Category;
+  isFavorite?: boolean; // флаг для UI, не обязателен
 };

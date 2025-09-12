@@ -81,7 +81,12 @@ const Catalog = () => {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
         {Array.from({ length: itemsPerPage }).map((_, idx) => (
-          <div key={idx} className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+          <div
+            key={idx}
+            role="status"
+            aria-label="Загрузка..." // 👈 для доступности
+            className="animate-pulse bg-gray-200 h-64 rounded-lg"
+          />
         ))}
       </div>
     );

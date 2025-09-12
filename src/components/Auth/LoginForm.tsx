@@ -32,7 +32,7 @@ const LoginForm = ({ onSwitch, inputClass }: LoginFormProps) => {
   const navigate = useNavigate();
   const { syncFavorites } = useFavorites();
 
-  // инициализация useForm с yup-валидатором
+  // ВАЖНО: mode: 'onChange' чтобы тесты (и UX) получали ошибки сразу при изменении
   const {
     register,
     handleSubmit,
@@ -40,6 +40,8 @@ const LoginForm = ({ onSwitch, inputClass }: LoginFormProps) => {
     formState: { errors },
   } = useForm<LoginFormInputs>({
     resolver: yupResolver(loginSchema),
+    mode: 'onChange', // <--- ключевое изменение
+    defaultValues: { email: '', password: '' }, // опционально
   });
 
   const onSubmit = async (data: LoginFormInputs) => {
@@ -80,6 +82,7 @@ const LoginForm = ({ onSwitch, inputClass }: LoginFormProps) => {
           type="email"
           placeholder="example@mail.com"
           {...register('email')}
+          aria-invalid={!!errors.email || undefined}
           className={inputClass(!!errors.email)}
         />
       </FormField>
@@ -90,6 +93,7 @@ const LoginForm = ({ onSwitch, inputClass }: LoginFormProps) => {
           type="password"
           placeholder="Введите пароль"
           {...register('password')}
+          aria-invalid={!!errors.password || undefined}
           className={inputClass(!!errors.password)}
         />
       </FormField>
