@@ -1,13 +1,13 @@
 ﻿import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
+// ✅ Берём URL из .env
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql', // URL нашего GraphQL-сервера
+  uri: import.meta.env.VITE_API_URL,
 });
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('token');
-  // console.log('🔍 Apollo authLink token:', token);
   return {
     headers: {
       ...headers,

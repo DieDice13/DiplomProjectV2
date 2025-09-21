@@ -10,7 +10,7 @@ const CartPage = () => {
       <Header />
       <Container>
         <Cart />
-        <ProductSliderContainer category="smartphones" />
+        <ProductSliderContainer category="smartphones" title="Смартфоны" />
       </Container>
       <Footer />
     </>

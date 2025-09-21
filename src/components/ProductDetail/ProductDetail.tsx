@@ -6,7 +6,7 @@ import { GET_ATTRIBUTES_BY_CATEGORY } from '../../graphql/queries/filters';
 import Reviews from '../../features/reviews/Reviews';
 import { GET_REVIEWS_BY_PRODUCT } from '../../graphql/queries/reviews';
 import { useFavorites } from '../../hooks/useFavorites';
-import type { ProductDetailType } from '../../types/ProductDetail';
+import type { Product } from '../../types/product'; // ✅ новый единый тип
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
 
@@ -16,7 +16,7 @@ type Review = { id: string; rating: number; comment?: string };
 
 export default function ProductDetail() {
   const { id, category } = useParams<{ id: string; category: string }>();
-  const [isExpanded, setIsExpanded] = useState(false); // Раскрытие полного описания
+  const [isExpanded, setIsExpanded] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
   const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
 
@@ -28,7 +28,7 @@ export default function ProductDetail() {
     data: productData,
     loading: loadingProduct,
     error: errorProduct,
-  } = useQuery<{ product: ProductDetailType }>(GET_PRODUCT_BY_ID, {
+  } = useQuery<{ product: Product }>(GET_PRODUCT_BY_ID, {
     variables: { id: productIdInt ?? 0 },
     skip: !productIdInt,
   });
