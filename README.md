@@ -1,69 +1,89 @@
-# React + TypeScript + Vite
+# 🛒 Магазин разнообразной техники  
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![React](https://img.shields.io/badge/react-19-61dafb?logo=react)
+![TypeScript](https://img.shields.io/badge/typescript-5.8-blue?logo=typescript)
+![Vite](https://img.shields.io/badge/vite-7.0-purple?logo=vite)
+![Redux Toolkit](https://img.shields.io/badge/redux--toolkit-764abc?logo=redux)
+![GraphQL](https://img.shields.io/badge/graphql-16-e535ab?logo=graphql)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-3.4-38bdf8?logo=tailwindcss)
 
-Currently, two official plugins are available:
+## 📌 Описание  
+Учебный fullstack-проект: интернет-магазин бытовой и компьютерной техники.  
+Фронтенд реализован на **React + TypeScript**, бэкенд — на **GraphQL API**.  
+Поддерживает регистрацию, авторизацию, каталог товаров, корзину и адаптивную вёрстку.  
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Деплой  
+🔗 [Открыть проект](https://diplomprojectv2.onrender.com/)  
 
-## Expanding the ESLint configuration
+*(В бесплатном тарифе запуск может занимать несколько секунд)*  
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📸 Скриншоты  
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🏠 Главная страница  
+![Главная](public/screenshots/HomePage.jpeg)  
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 📑 Каталог товаров  
+![Каталог](public/screenshots/CatalogPage.jpeg)  
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 📦 Страница товара с отзывами  
+![Товар](public/screenshots/ProductDetailPage.jpeg)  
+
+### 🛒 Корзина  
+![Корзина](public/screenshots/CartPage.jpeg)  
+
+### ⭐ Избранные товары  
+![Избранные](public/screenshots/FavoritesPage.jpeg)  
+
+## ✨ Функционал  
+
+- 📑 Каталог товаров с категориями (кухонная техника, ноутбуки, игровые устройства и т. д.)  
+- 🔍 Поиск и фильтрация по категориям  
+- 📊 Пагинация и сортировка списка товаров  
+- 🛒 Добавление и удаление товаров в корзину  
+- 🔐 Регистрация и авторизация пользователей (JWT)  
+- 📱 Адаптивная вёрстка  
+- 🎨 Анимации интерфейса (Framer Motion)  
+
+## 🛠️ Технологии  
+
+- **React 19 + TypeScript 5.8**  
+- **Vite 7**  
+- **Redux Toolkit**  
+- **Apollo Client (GraphQL)**  
+- **TailwindCSS + SCSS**  
+- **React Router DOM**  
+- **React Hook Form + Yup**  
+- **Framer Motion**  
+- **Swiper**  
+- **Vitest + Testing Library**  
+
+## 📦 Установка и запуск  
+
+⚠️ Для полноценной работы приложения требуется запущенный GraphQL backend.  
+Инструкции по установке находятся в репозитории [backend](https://github.com/DieDice13/DiplomProjectV2-backend).  
+
+```bash
+# Клонируем репозиторий проекта
+git clone https://github.com/DieDice13/DiplomProjectV2
+
+# Переходим в папку с проектом
+cd project-name
+
+# Устанавливаем зависимости
+npm install
+# или
+pnpm install
+
+# Запускаем локальный сервер разработки
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔮 Планы по развитию
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+💳 Интеграция онлайн-оплаты (Stripe/PayPal)
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+👤 Личный кабинет пользователя с историей заказов
+
+🛠 Панель администратора для управления товарами
+
+📦 Оформление заказов с доставкой
